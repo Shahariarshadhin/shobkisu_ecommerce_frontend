@@ -1,19 +1,6 @@
+import LayoutWrapper from "../components/Landing/LayoutWrapper";
 import "./globals.css";
 import { ReduxProvider } from "./providers";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import Navbar from "../components/Layout/Navbar";
-import Footer from "../components/Layout/Footer";
-
-// const geistSans = Geist({
-//   variable: "--font-geist-sans",
-//   subsets: ["latin"],
-// });
-
-// const geistMono = Geist_Mono({
-//   variable: "--font-geist-mono",
-//   subsets: ["latin"],
-// });
 
 export const metadata = {
   title: "সব কিছু || অন্যরকম সব কিছু",
@@ -24,9 +11,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <Navbar />
-        <ReduxProvider>{children}</ReduxProvider>
-        <Footer />
+        <LayoutWrapper>
+          <ReduxProvider>{children}</ReduxProvider>
+        </LayoutWrapper>
       </body>
     </html>
   );

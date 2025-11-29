@@ -41,7 +41,7 @@ const Footer = () => {
                         </div>
                     </div>
                     <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center">
-                        <p className="text-sm text-[#a34610]">© 2024  সব কিছু. All rights reserved.</p>
+                        <p className="text-sm text-[#a34610]">©{new Date().getFullYear()}  সব কিছু. All rights reserved.</p>
                         <div className="flex space-x-6 mt-4 md:mt-0">
                             <a href="#" className="text-[#a34610] transition">Privacy Policy</a>
                             <a href="#" className="text-[#a34610] transition">Terms of Service</a>

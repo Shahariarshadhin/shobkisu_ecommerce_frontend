@@ -54,7 +54,7 @@ const Navbar = () => {
                             </button>
                             <button className="p-2 hover:bg-gray-100 rounded-full transition relative">
                                 <ShoppingCart className="w-5 h-5 text-[#a34610]" />
-                                <span className="absolute -top-1 -right-1 bg-violet-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
+                                <span className="absolute -top-1 -right-1 bg-[#a34610] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
                             </button>
                             <button
                                 className="md:hidden p-2"

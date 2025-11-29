@@ -1,6 +1,7 @@
 'use client'
 import { useMemo, useState, useEffect } from 'react'
 import { Package, Phone, MapPin, User, ShoppingCart } from 'lucide-react'
+import Link from 'next/link'
 
 // Mock products data
 const products = [
@@ -355,7 +356,8 @@ export default function BanglaProductPage() {
 
         {/* Footer */}
         <div className="text-center text-gray-600 py-6">
-          <p>copyright © Khejur 2025</p>
+          <p className="text-sm text-[#a34610]">©{new Date().getFullYear()}  সব কিছু. All rights reserved.</p>
+          <Link href="/" className="text-[#a34610] transition">Home</Link>
         </div>
       </div>
     </div>
