@@ -32,7 +32,7 @@ export default function DashboardLayout({ children }) {
         { label: "Orders", link: "/dashboard/order" },
       ],
     },
-    { icon: Users, label: "Team", link: "/dashboard/team" },
+    { icon: Users, label: "Create Advertisement", link: "/dashboard/create-advertisement-content" },
     { icon: FileText, label: "Projects", link: "/dashboard/projects" },
     { icon: Settings, label: "Settings", link: "/dashboard/settings" },
   ];
