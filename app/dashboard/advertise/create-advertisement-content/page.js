@@ -1,4 +1,4 @@
-import CreateAdvertiseContent from "../../../components/Dashboard/ContentManagement/CreateAdvertiseContent";
+import CreateAdvertiseContent from "../../../../components/Dashboard/ContentManagement/CreateAdvertiseContent";
 
 const page = () => {
   return (

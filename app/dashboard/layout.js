@@ -32,6 +32,15 @@ export default function DashboardLayout({ children }) {
         { label: "Orders", link: "/dashboard/order" },
       ],
     },
+    {
+      icon: BarChart3,
+      label: "Advertisement",
+      hasSubmenu: true,
+      submenu: [
+        { label: "Create Advertisement", link: "/dashboard/advertise/create-advertisement-content" },
+        { label: "Advertisement List", link: "/dashboard/advertise/advertise-list" },
+      ],
+    },
     { icon: Users, label: "Create Advertisement", link: "/dashboard/create-advertisement-content" },
     { icon: FileText, label: "Projects", link: "/dashboard/projects" },
     { icon: Settings, label: "Settings", link: "/dashboard/settings" },
