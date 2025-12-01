@@ -23,12 +23,17 @@ const CreateAdvertiseContent = ({ onSuccess, onCancel, editContent = null }) => 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
+    // Backend API URL - Change this to your actual backend URL
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+
     useEffect(() => {
         if (editContent) {
             setFormData({
-                title: editContent.title,
-                offerEndTime: new Date(editContent.offerEndTime).toISOString().slice(0, 16),
-                thumbImage: editContent.thumbImage,
+                title: editContent.title || '',
+                offerEndTime: editContent.offerEndTime 
+                    ? new Date(editContent.offerEndTime).toISOString().slice(0, 16)
+                    : '',
+                thumbImage: editContent.thumbImage || '',
                 regularImages: editContent.regularImages?.length ? editContent.regularImages : [''],
                 videos: editContent.videos?.length ? editContent.videos : [''],
                 discountShows: editContent.discountShows?.length ? editContent.discountShows : [''],
@@ -43,35 +48,82 @@ const CreateAdvertiseContent = ({ onSuccess, onCancel, editContent = null }) => 
         }
     }, [editContent]);
 
-    const handleSubmit = async () => {
+    const handleSubmit = async (e) => {
+        if (e) e.preventDefault();
         setError('');
 
+        // Validation
         if (!formData.title || !formData.offerEndTime || !formData.thumbImage) {
-            setError('Please fill in all required fields');
+            setError('Please fill in all required fields (Title, Offer End Time, and Thumbnail Image)');
             return;
         }
+
+        // Filter out empty strings from arrays
+        const cleanedData = {
+            ...formData,
+            regularImages: formData.regularImages.filter(img => img.trim() !== ''),
+            videos: formData.videos.filter(video => video.trim() !== ''),
+            discountShows: formData.discountShows.filter(discount => discount.trim() !== ''),
+            // Clean sections - only include sections with content
+            sections: Object.entries(formData.sections).reduce((acc, [key, value]) => {
+                if (value.title || value.content) {
+                    acc[key] = value;
+                }
+                return acc;
+            }, {})
+        };
 
         setLoading(true);
 
         try {
-            const API_BASE_URL = 'http://localhost:5000/api/advertise-contents';
             const method = editContent ? 'PUT' : 'POST';
-            const url = editContent ? `${API_BASE_URL}/${editContent._id || editContent.id}` : API_BASE_URL;
+            const url = editContent 
+                ? `${API_BASE_URL}/advertise-contents/${editContent._id || editContent.id}`
+                : `${API_BASE_URL}/advertise-contents`;
 
             const response = await fetch(url, {
                 method,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
+                headers: { 
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(cleanedData)
             });
 
+            const data = await response.json();
+
             if (response.ok) {
-                if (onSuccess) onSuccess();
+                // Show success message
+                alert(data.message || `Content ${editContent ? 'updated' : 'created'} successfully!`);
+                
+                // Call onSuccess callback if provided
+                if (onSuccess) {
+                    onSuccess(data.data);
+                }
+                
+                // Reset form if creating new content
+                if (!editContent) {
+                    setFormData({
+                        title: '',
+                        offerEndTime: '',
+                        thumbImage: '',
+                        regularImages: [''],
+                        videos: [''],
+                        discountShows: [''],
+                        sections: {
+                            section1: { title: '', content: '' },
+                            section2: { title: '', content: '' },
+                            section3: { title: '', content: '' },
+                            section4: { title: '', content: '' },
+                            section5: { title: '', content: '' }
+                        }
+                    });
+                }
             } else {
-                const data = await response.json();
-                setError(data.message || 'Failed to save content');
+                setError(data.message || `Failed to ${editContent ? 'update' : 'create'} content`);
             }
         } catch (err) {
-            setError('Error saving content: ' + err.message);
+            console.error('Error saving content:', err);
+            setError(`Network error: ${err.message}. Please check if the backend server is running.`);
         } finally {
             setLoading(false);
         }
@@ -122,6 +174,7 @@ const CreateAdvertiseContent = ({ onSuccess, onCancel, editContent = null }) => 
                     <button
                         onClick={onCancel}
                         className="text-gray-500 hover:text-gray-700"
+                        type="button"
                     >
                         <X size={24} />
                     </button>
@@ -130,11 +183,12 @@ const CreateAdvertiseContent = ({ onSuccess, onCancel, editContent = null }) => 
 
             {error && (
                 <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                    {error}
+                    <strong className="font-bold">Error: </strong>
+                    <span>{error}</span>
                 </div>
             )}
 
-            <div className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Basic Info */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -147,6 +201,7 @@ const CreateAdvertiseContent = ({ onSuccess, onCancel, editContent = null }) => 
                             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                             className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             placeholder="Black Friday Sale"
+                            required
                         />
                     </div>
 
@@ -159,6 +214,7 @@ const CreateAdvertiseContent = ({ onSuccess, onCancel, editContent = null }) => 
                             value={formData.offerEndTime}
                             onChange={(e) => setFormData({ ...formData, offerEndTime: e.target.value })}
                             className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            required
                         />
                     </div>
                 </div>
@@ -175,13 +231,18 @@ const CreateAdvertiseContent = ({ onSuccess, onCancel, editContent = null }) => 
                         onChange={(e) => setFormData({ ...formData, thumbImage: e.target.value })}
                         className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="https://example.com/image.jpg"
+                        required
                     />
                     {formData.thumbImage && (
                         <img
                             src={formData.thumbImage}
-                            alt="Preview"
+                            alt="Thumbnail Preview"
                             className="mt-2 w-full h-48 object-cover rounded-lg"
-                            onError={(e) => e.target.style.display = 'none'}
+                            onError={(e) => {
+                                e.target.style.display = 'none';
+                                setError('Failed to load thumbnail image. Please check the URL.');
+                            }}
+                            onLoad={(e) => e.target.style.display = 'block'}
                         />
                     )}
                 </div>
@@ -202,8 +263,9 @@ const CreateAdvertiseContent = ({ onSuccess, onCancel, editContent = null }) => 
                                 placeholder="https://example.com/image.jpg"
                             />
                             <button
+                                type="button"
                                 onClick={() => removeArrayItem('regularImages', index)}
-                                className="bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600 transition"
+                                className="bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600 transition disabled:opacity-50"
                                 disabled={formData.regularImages.length === 1}
                             >
                                 <Trash2 size={18} />
@@ -211,6 +273,7 @@ const CreateAdvertiseContent = ({ onSuccess, onCancel, editContent = null }) => 
                         </div>
                     ))}
                     <button
+                        type="button"
                         onClick={() => addArrayItem('regularImages')}
                         className="text-blue-600 hover:text-blue-700 text-sm font-medium"
                     >
@@ -234,8 +297,9 @@ const CreateAdvertiseContent = ({ onSuccess, onCancel, editContent = null }) => 
                                 placeholder="https://example.com/video.mp4"
                             />
                             <button
+                                type="button"
                                 onClick={() => removeArrayItem('videos', index)}
-                                className="bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600 transition"
+                                className="bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600 transition disabled:opacity-50"
                                 disabled={formData.videos.length === 1}
                             >
                                 <Trash2 size={18} />
@@ -243,6 +307,7 @@ const CreateAdvertiseContent = ({ onSuccess, onCancel, editContent = null }) => 
                         </div>
                     ))}
                     <button
+                        type="button"
                         onClick={() => addArrayItem('videos')}
                         className="text-blue-600 hover:text-blue-700 text-sm font-medium"
                     >
@@ -266,8 +331,9 @@ const CreateAdvertiseContent = ({ onSuccess, onCancel, editContent = null }) => 
                                 placeholder="50% OFF"
                             />
                             <button
+                                type="button"
                                 onClick={() => removeArrayItem('discountShows', index)}
-                                className="bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600 transition"
+                                className="bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600 transition disabled:opacity-50"
                                 disabled={formData.discountShows.length === 1}
                             >
                                 <Trash2 size={18} />
@@ -275,6 +341,7 @@ const CreateAdvertiseContent = ({ onSuccess, onCancel, editContent = null }) => 
                         </div>
                     ))}
                     <button
+                        type="button"
                         onClick={() => addArrayItem('discountShows')}
                         className="text-blue-600 hover:text-blue-700 text-sm font-medium"
                     >
@@ -314,7 +381,7 @@ const CreateAdvertiseContent = ({ onSuccess, onCancel, editContent = null }) => 
                 {/* Action Buttons */}
                 <div className="flex gap-3 pt-4 border-t border-gray-200">
                     <button
-                        onClick={handleSubmit}
+                        type="submit"
                         disabled={loading}
                         className="flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
                     >
@@ -323,14 +390,16 @@ const CreateAdvertiseContent = ({ onSuccess, onCancel, editContent = null }) => 
                     </button>
                     {onCancel && (
                         <button
+                            type="button"
                             onClick={onCancel}
                             className="bg-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-400 transition"
+                            disabled={loading}
                         >
                             Cancel
                         </button>
                     )}
                 </div>
-            </div>
+            </form>
         </div>
     );
 };
