@@ -1,6 +1,6 @@
 "use client"
 
-import { CheckCircle, Clock, Download, Eye, Package, RefreshCw, Search, Truck, XCircle } from 'lucide-react';
+import { CheckCircle, Clock, Download, Eye, FileSpreadsheet, Package, RefreshCw, Search, Truck, XCircle } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
 const OrderList = () => {
@@ -11,6 +11,7 @@ const OrderList = () => {
     const [statusFilter, setStatusFilter] = useState('all');
     const [sortBy, setSortBy] = useState('date-desc');
     const [selectedOrder, setSelectedOrder] = useState(null);
+    const [showExportMenu, setShowExportMenu] = useState(false);
 
     const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
@@ -29,7 +30,6 @@ const OrderList = () => {
         refunded: { color: 'bg-gray-100 text-gray-800', label: 'Refunded' },
     };
 
-    // Fetch orders from API
     useEffect(() => {
         fetchOrders();
     }, []);
@@ -37,11 +37,11 @@ const OrderList = () => {
     const fetchOrders = async () => {
         setLoading(true);
         setError('');
-        
+
         try {
             const response = await fetch(`${API_BASE_URL}/advertise-orders?sort=newest`);
             const data = await response.json();
-            
+
             if (response.ok) {
                 setOrders(data.data || []);
             } else {
@@ -57,7 +57,7 @@ const OrderList = () => {
 
     const filteredAndSortedOrders = useMemo(() => {
         let result = orders.filter(order => {
-            const matchesSearch = 
+            const matchesSearch =
                 (order._id || order.id || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
                 order.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 order.phone.includes(searchTerm) ||
@@ -99,7 +99,6 @@ const OrderList = () => {
             const data = await response.json();
 
             if (response.ok) {
-                // Update local state
                 setOrders(orders.map(order =>
                     (order._id || order.id) === orderId ? { ...order, status: newStatus } : order
                 ));
@@ -113,30 +112,73 @@ const OrderList = () => {
     };
 
     const exportToCSV = () => {
-        const headers = ['Order ID', 'Customer', 'Phone', 'Address', 'Product', 'Quantity', 'Price', 'Total', 'Savings', 'Status', 'Payment Status', 'Date'];
+        const headers = ['Order ID', 'Customer', 'Phone', 'Address', 'Product', 'Quantity', 'Unit Price', 'Total Price', 'Savings', 'Status', 'Payment Status', 'Payment Method', 'Date'];
         const csvData = filteredAndSortedOrders.map(order =>
             [
-                order._id || order.id,
-                order.name,
-                order.phone,
-                order.address,
-                order.contentTitle,
+                `"${order._id || order.id}"`,
+                `"${order.name}"`,
+                `"${order.phone}"`,
+                `"${order.address}"`,
+                `"${order.contentTitle}"`,
                 order.quantity,
-                order.price,
-                order.totalPrice,
-                order.savings,
+                order.price.toFixed(2),
+                order.totalPrice.toFixed(2),
+                order.savings.toFixed(2),
                 order.status,
                 order.paymentStatus,
-                new Date(order.createdAt).toLocaleDateString()
+                order.paymentMethod === 'cash_on_delivery' ? 'COD' : order.paymentMethod,
+                `"${new Date(order.createdAt).toLocaleString()}"`
             ].join(',')
         );
         const csv = [headers.join(','), ...csvData].join('\n');
-        const blob = new Blob([csv], { type: 'text/csv' });
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
         a.download = `orders-${new Date().toISOString().split('T')[0]}.csv`;
         a.click();
+        window.URL.revokeObjectURL(url);
+        setShowExportMenu(false);
+    };
+
+    const exportToExcel = () => {
+        // Create worksheet data
+        const headers = ['Order ID', 'Customer', 'Phone', 'Address', 'Product', 'Quantity', 'Unit Price', 'Total Price', 'Savings', 'Status', 'Payment Status', 'Payment Method', 'Date'];
+        const data = filteredAndSortedOrders.map(order => [
+            order._id || order.id,
+            order.name,
+            order.phone,
+            order.address,
+            order.contentTitle,
+            order.quantity,
+            order.price,
+            order.totalPrice,
+            order.savings,
+            order.status,
+            order.paymentStatus,
+            order.paymentMethod === 'cash_on_delivery' ? 'COD' : order.paymentMethod,
+            new Date(order.createdAt).toLocaleString()
+        ]);
+
+        // Create HTML table
+        let html = '<html><head><meta charset="utf-8"><style>table{border-collapse:collapse;}th,td{border:1px solid #ddd;padding:8px;text-align:left;}th{background-color:#a34610;color:white;}</style></head><body>';
+        html += '<table>';
+        html += '<thead><tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr></thead>';
+        html += '<tbody>';
+        data.forEach(row => {
+            html += '<tr>' + row.map(cell => `<td>${cell}</td>`).join('') + '</tr>';
+        });
+        html += '</tbody></table></body></html>';
+
+        // Create blob and download
+        const blob = new Blob([html], { type: 'application/vnd.ms-excel' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `orders-${new Date().toISOString().split('T')[0]}.xls`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+        setShowExportMenu(false);
     };
 
     const formatDate = (dateString) => {
@@ -273,16 +315,45 @@ const OrderList = () => {
                                 <option value="amount-desc">Highest Amount</option>
                                 <option value="amount-asc">Lowest Amount</option>
                             </select>
-                            <button
-                                onClick={exportToCSV}
-                                className="px-4 py-3 bg-[#a34610] text-white rounded-xl hover:bg-[#8a3c0e] transition-colors shadow-md"
-                                title="Export to CSV"
-                            >
-                                <Download size={20} />
-                            </button>
+                            <div className="relative">
+                                <button
+                                    onClick={() => setShowExportMenu(!showExportMenu)}
+                                    className="px-4 py-3 bg-[#a34610] text-white rounded-xl hover:bg-[#8a3c0e] transition-colors shadow-md flex items-center gap-2"
+                                    title="Export Data"
+                                >
+                                    <Download size={20} />
+                                    <span className="hidden sm:inline">Export</span>
+                                </button>
+                                {showExportMenu && (
+                                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 z-10">
+                                        <button
+                                            onClick={exportToCSV}
+                                            className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center gap-3 rounded-t-xl transition-colors"
+                                        >
+                                            <FileSpreadsheet size={18} className="text-green-600" />
+                                            <span className="text-sm font-medium text-gray-700">Export as CSV</span>
+                                        </button>
+                                        <button
+                                            onClick={exportToExcel}
+                                            className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center gap-3 rounded-b-xl transition-colors border-t"
+                                        >
+                                            <FileSpreadsheet size={18} className="text-blue-600" />
+                                            <span className="text-sm font-medium text-gray-700">Export as Excel</span>
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
+
+                {/* Close dropdown when clicking outside */}
+                {showExportMenu && (
+                    <div
+                        className="fixed inset-0 z-0"
+                        onClick={() => setShowExportMenu(false)}
+                    />
+                )}
 
                 {/* Orders Table */}
                 <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
@@ -296,6 +367,7 @@ const OrderList = () => {
                                     <th className="px-6 py-4 text-left text-sm font-semibold">Qty</th>
                                     <th className="px-6 py-4 text-left text-sm font-semibold">Total</th>
                                     <th className="px-6 py-4 text-left text-sm font-semibold">Date</th>
+                                    <th className="px-6 py-4 text-left text-sm font-semibold">Payment Method</th>
                                     <th className="px-6 py-4 text-left text-sm font-semibold">Status</th>
                                     <th className="px-6 py-4 text-left text-sm font-semibold">Payment</th>
                                     <th className="px-6 py-4 text-left text-sm font-semibold">Actions</th>
@@ -324,7 +396,32 @@ const OrderList = () => {
                                                 )}
                                             </td>
                                             <td className="px-6 py-4 text-sm text-[#a34610]">
-                                                {formatDate(order.createdAt)}
+                                                <div className="flex flex-col leading-tight">
+                                                    
+
+                                                    <span>
+                                                        {new Date(order.createdAt).toLocaleTimeString("en-US", {
+                                                            hour: "2-digit",
+                                                            minute: "2-digit",
+                                                        })}
+                                                    </span>
+                                                    <span>
+                                                        {new Date(order.createdAt).toLocaleDateString("en-US", {
+                                                            month: "short",
+                                                            day: "numeric",
+                                                            year: "numeric",
+                                                        })}
+                                                    </span>
+                                                </div>
+                                            </td>
+
+
+                                            <td className="px-6 py-4">
+
+                                                <div className="text-lg font-semibold text-[#a34610] capitalize">
+                                                    {order.paymentMethod === 'cash_on_delivery' ? 'COD' : order.paymentMethod.replace('_', ' ')}
+                                                </div>
+
                                             </td>
                                             <td className="px-6 py-4">
                                                 <select
@@ -442,7 +539,9 @@ const OrderList = () => {
                                     </div>
                                     <div>
                                         <p className="text-sm text-gray-600">Payment Method</p>
-                                        <p className="text-lg font-semibold text-[#a34610] capitalize">{selectedOrder.paymentMethod.replace('_', ' ')}</p>
+                                        <p className="text-lg font-semibold text-[#a34610] capitalize">
+                                            {selectedOrder.paymentMethod === 'cash_on_delivery' ? 'COD' : selectedOrder.paymentMethod.replace('_', ' ')}
+                                        </p>
                                     </div>
                                     {selectedOrder.notes && (
                                         <div className="col-span-2">
