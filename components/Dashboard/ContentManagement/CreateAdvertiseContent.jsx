@@ -9,6 +9,8 @@ const CreateAdvertiseContent = ({ onSuccess, onCancel, editContent = null }) => 
         slug: '',
         offerEndTime: '',
         thumbImage: '',
+        price: 0,
+        originalPrice: 0,
         regularImages: [''],
         videos: [''],
         discountShows: [],
@@ -33,6 +35,8 @@ const CreateAdvertiseContent = ({ onSuccess, onCancel, editContent = null }) => 
                     ? new Date(editContent.offerEndTime).toISOString().slice(0, 16)
                     : '',
                 thumbImage: editContent.thumbImage || '',
+                price: editContent.price || 0,
+                originalPrice: editContent.originalPrice || 0,
                 regularImages: editContent.regularImages?.length ? editContent.regularImages : [''],
                 videos: editContent.videos?.length ? editContent.videos : [''],
                 discountShows: editContent.discountShows?.length ? editContent.discountShows : [],
@@ -74,9 +78,16 @@ const CreateAdvertiseContent = ({ onSuccess, onCancel, editContent = null }) => 
             return;
         }
 
+        if (!formData.price || formData.price <= 0) {
+            setError('Please enter a valid price greater than 0');
+            return;
+        }
+
         const cleanedData = {
             ...formData,
             slug: formData.slug || generateSlug(formData.title),
+            price: parseFloat(formData.price) || 0,
+            originalPrice: parseFloat(formData.originalPrice) || 0,
             regularImages: formData.regularImages.filter(img => img.trim() !== ''),
             videos: formData.videos.filter(video => video.trim() !== ''),
             discountShows: formData.discountShows.filter(d => d.text && d.text.trim() !== '')
@@ -108,6 +119,8 @@ const CreateAdvertiseContent = ({ onSuccess, onCancel, editContent = null }) => 
                         slug: '',
                         offerEndTime: '',
                         thumbImage: '',
+                        price: 0,
+                        originalPrice: 0,
                         regularImages: [''],
                         videos: [''],
                         discountShows: [],
@@ -280,6 +293,52 @@ const CreateAdvertiseContent = ({ onSuccess, onCancel, editContent = null }) => 
                             required
                         />
                     </div>
+                    
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Price (৳) <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={formData.price}
+                            onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })}
+                            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="1490"
+                            required
+                        />
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Original Price (৳) <span className="text-gray-500 text-xs">(Optional)</span>
+                        </label>
+                        <input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={formData.originalPrice}
+                            onChange={(e) => setFormData({ ...formData, originalPrice: parseFloat(e.target.value) || 0 })}
+                            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="2990"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">For showing discount/savings</p>
+                    </div>
+                    
+                    {formData.price > 0 && formData.originalPrice > formData.price && (
+                        <div className="flex items-center">
+                            <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-2">
+                                <p className="text-sm text-gray-700">Discount:</p>
+                                <p className="text-2xl font-bold text-green-600">
+                                    {Math.round(((formData.originalPrice - formData.price) / formData.originalPrice) * 100)}% OFF
+                                </p>
+                                <p className="text-xs text-gray-600">Save ৳{(formData.originalPrice - formData.price).toFixed(2)}</p>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Thumbnail */}
