@@ -1,51 +1,78 @@
 "use client"
 
-import React, { useState, useMemo } from 'react';
-import { Search, Filter, Download, Eye, Package, Truck, CheckCircle, XCircle, Clock } from 'lucide-react';
-
-// Sample order data - replace with your API data
-const initialOrders = [
-    { id: 'ORD-001', customer: 'John Doe', email: 'john@example.com', product: 'Wireless Headphones', amount: 129.99, status: 'delivered', date: '2024-11-25', quantity: 2 },
-    { id: 'ORD-002', customer: 'Sarah Smith', email: 'sarah@example.com', product: 'Laptop Stand', amount: 49.99, status: 'pending', date: '2024-11-28', quantity: 1 },
-    { id: 'ORD-003', customer: 'Mike Johnson', email: 'mike@example.com', product: 'USB-C Cable', amount: 19.99, status: 'shipped', date: '2024-11-27', quantity: 3 },
-    { id: 'ORD-004', customer: 'Emily Brown', email: 'emily@example.com', product: 'Mechanical Keyboard', amount: 159.99, status: 'processing', date: '2024-11-26', quantity: 1 },
-    { id: 'ORD-005', customer: 'David Lee', email: 'david@example.com', product: 'Monitor 27"', amount: 299.99, status: 'cancelled', date: '2024-11-24', quantity: 1 },
-    { id: 'ORD-006', customer: 'Lisa Wang', email: 'lisa@example.com', product: 'Webcam HD', amount: 89.99, status: 'delivered', date: '2024-11-23', quantity: 1 },
-    { id: 'ORD-007', customer: 'Tom Harris', email: 'tom@example.com', product: 'Mouse Pad', amount: 24.99, status: 'shipped', date: '2024-11-28', quantity: 2 },
-    { id: 'ORD-008', customer: 'Anna Martinez', email: 'anna@example.com', product: 'Phone Case', amount: 15.99, status: 'pending', date: '2024-11-29', quantity: 1 },
-];
+import { CheckCircle, Clock, Download, Eye, Package, RefreshCw, Search, Truck, XCircle } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 
 const OrderList = () => {
-    const [orders, setOrders] = useState(initialOrders);
+    const [orders, setOrders] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
     const [sortBy, setSortBy] = useState('date-desc');
     const [selectedOrder, setSelectedOrder] = useState(null);
 
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+
     const statusConfig = {
         pending: { color: 'bg-yellow-100 text-yellow-800 border-yellow-300', icon: Clock, label: 'Pending' },
+        confirmed: { color: 'bg-blue-100 text-blue-800 border-blue-300', icon: CheckCircle, label: 'Confirmed' },
         processing: { color: 'bg-blue-100 text-blue-800 border-blue-300', icon: Package, label: 'Processing' },
         shipped: { color: 'bg-purple-100 text-purple-800 border-purple-300', icon: Truck, label: 'Shipped' },
         delivered: { color: 'bg-green-100 text-green-800 border-green-300', icon: CheckCircle, label: 'Delivered' },
         cancelled: { color: 'bg-red-100 text-red-800 border-red-300', icon: XCircle, label: 'Cancelled' },
     };
 
+    const paymentStatusConfig = {
+        unpaid: { color: 'bg-red-100 text-red-800', label: 'Unpaid' },
+        paid: { color: 'bg-green-100 text-green-800', label: 'Paid' },
+        refunded: { color: 'bg-gray-100 text-gray-800', label: 'Refunded' },
+    };
+
+    // Fetch orders from API
+    useEffect(() => {
+        fetchOrders();
+    }, []);
+
+    const fetchOrders = async () => {
+        setLoading(true);
+        setError('');
+        
+        try {
+            const response = await fetch(`${API_BASE_URL}/advertise-orders?sort=newest`);
+            const data = await response.json();
+            
+            if (response.ok) {
+                setOrders(data.data || []);
+            } else {
+                setError(data.message || 'Failed to fetch orders');
+            }
+        } catch (err) {
+            console.error('Error fetching orders:', err);
+            setError('Network error. Please check if the backend server is running.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const filteredAndSortedOrders = useMemo(() => {
         let result = orders.filter(order => {
-            const matchesSearch = order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                order.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                order.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                order.product.toLowerCase().includes(searchTerm.toLowerCase());
+            const matchesSearch = 
+                (order._id || order.id || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                order.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                order.phone.includes(searchTerm) ||
+                order.contentTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                order.address.toLowerCase().includes(searchTerm.toLowerCase());
             const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
             return matchesSearch && matchesStatus;
         });
 
         result.sort((a, b) => {
             switch (sortBy) {
-                case 'date-desc': return new Date(b.date) - new Date(a.date);
-                case 'date-asc': return new Date(a.date) - new Date(b.date);
-                case 'amount-desc': return b.amount - a.amount;
-                case 'amount-asc': return a.amount - b.amount;
+                case 'date-desc': return new Date(b.createdAt) - new Date(a.createdAt);
+                case 'date-asc': return new Date(a.createdAt) - new Date(b.createdAt);
+                case 'amount-desc': return b.totalPrice - a.totalPrice;
+                case 'amount-asc': return a.totalPrice - b.totalPrice;
                 default: return 0;
             }
         });
@@ -55,40 +82,107 @@ const OrderList = () => {
 
     const stats = useMemo(() => {
         const total = orders.length;
-        const totalRevenue = orders.reduce((sum, order) => sum + order.amount, 0);
+        const totalRevenue = orders.reduce((sum, order) => sum + order.totalPrice, 0);
         const pending = orders.filter(o => o.status === 'pending').length;
         const delivered = orders.filter(o => o.status === 'delivered').length;
         return { total, totalRevenue, pending, delivered };
     }, [orders]);
 
-    const updateOrderStatus = (orderId, newStatus) => {
-        setOrders(orders.map(order =>
-            order.id === orderId ? { ...order, status: newStatus } : order
-        ));
+    const updateOrderStatus = async (orderId, newStatus) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/advertise-orders/${orderId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: newStatus })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // Update local state
+                setOrders(orders.map(order =>
+                    (order._id || order.id) === orderId ? { ...order, status: newStatus } : order
+                ));
+            } else {
+                alert(data.message || 'Failed to update order status');
+            }
+        } catch (err) {
+            console.error('Error updating order:', err);
+            alert('Failed to update order status');
+        }
     };
 
     const exportToCSV = () => {
-        const headers = ['Order ID', 'Customer', 'Email', 'Product', 'Amount', 'Status', 'Date', 'Quantity'];
+        const headers = ['Order ID', 'Customer', 'Phone', 'Address', 'Product', 'Quantity', 'Price', 'Total', 'Savings', 'Status', 'Payment Status', 'Date'];
         const csvData = filteredAndSortedOrders.map(order =>
-            [order.id, order.customer, order.email, order.product, order.amount, order.status, order.date, order.quantity].join(',')
+            [
+                order._id || order.id,
+                order.name,
+                order.phone,
+                order.address,
+                order.contentTitle,
+                order.quantity,
+                order.price,
+                order.totalPrice,
+                order.savings,
+                order.status,
+                order.paymentStatus,
+                new Date(order.createdAt).toLocaleDateString()
+            ].join(',')
         );
         const csv = [headers.join(','), ...csvData].join('\n');
         const blob = new Blob([csv], { type: 'text/csv' });
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'orders.csv';
+        a.download = `orders-${new Date().toISOString().split('T')[0]}.csv`;
         a.click();
     };
+
+    const formatDate = (dateString) => {
+        return new Date(dateString).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 p-6 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading orders...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 p-6 py-4">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
-                <div className="mb-8">
-                    <h1 className="text-4xl font-bold text-[#a34610] mb-2">Order Management</h1>
-                    <p className="text-[#a34610]">Track and manage all your orders in one place</p>
+                <div className="mb-8 flex justify-between items-center">
+                    <div>
+                        <h1 className="text-4xl font-bold text-[#a34610] mb-2">Order Management</h1>
+                        <p className="text-[#a34610]">Track and manage all your orders in one place</p>
+                    </div>
+                    <button
+                        onClick={fetchOrders}
+                        className="flex items-center gap-2 px-4 py-2 bg-[#a34610] text-white rounded-xl hover:bg-[#8a3c0e] transition-colors shadow-md"
+                    >
+                        <RefreshCw size={20} />
+                        Refresh
+                    </button>
                 </div>
+
+                {error && (
+                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl mb-6">
+                        {error}
+                    </div>
+                )}
 
                 {/* Stats Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -146,7 +240,7 @@ const OrderList = () => {
                                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                                 <input
                                     type="text"
-                                    placeholder="Search orders, customers, products..."
+                                    placeholder="Search by name, phone, product..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                     className="w-full pl-10 pr-4 py-3 border border-[#a34610] rounded-xl focus:ring-2 focus:ring-[#a34610] focus:border-transparent outline-none transition-all"
@@ -161,6 +255,7 @@ const OrderList = () => {
                             >
                                 <option value="all">All Status</option>
                                 <option value="pending">Pending</option>
+                                <option value="confirmed">Confirmed</option>
                                 <option value="processing">Processing</option>
                                 <option value="shipped">Shipped</option>
                                 <option value="delivered">Delivered</option>
@@ -180,7 +275,8 @@ const OrderList = () => {
                             </select>
                             <button
                                 onClick={exportToCSV}
-                                className="px-4 py-3 bg-[#a34610] text-white rounded-xl hover:bg-blue-700 transition-colors shadow-md"
+                                className="px-4 py-3 bg-[#a34610] text-white rounded-xl hover:bg-[#8a3c0e] transition-colors shadow-md"
+                                title="Export to CSV"
                             >
                                 <Download size={20} />
                             </button>
@@ -197,41 +293,57 @@ const OrderList = () => {
                                     <th className="px-6 py-4 text-left text-sm font-semibold">Order ID</th>
                                     <th className="px-6 py-4 text-left text-sm font-semibold">Customer</th>
                                     <th className="px-6 py-4 text-left text-sm font-semibold">Product</th>
-                                    <th className="px-6 py-4 text-left text-sm font-semibold">Quantity</th>
-                                    <th className="px-6 py-4 text-left text-sm font-semibold">Amount</th>
+                                    <th className="px-6 py-4 text-left text-sm font-semibold">Qty</th>
+                                    <th className="px-6 py-4 text-left text-sm font-semibold">Total</th>
                                     <th className="px-6 py-4 text-left text-sm font-semibold">Date</th>
                                     <th className="px-6 py-4 text-left text-sm font-semibold">Status</th>
+                                    <th className="px-6 py-4 text-left text-sm font-semibold">Payment</th>
                                     <th className="px-6 py-4 text-left text-sm font-semibold">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-200">
-                                {filteredAndSortedOrders.map((order, index) => {
-                                    const StatusIcon = statusConfig[order.status].icon;
+                                {filteredAndSortedOrders.map((order) => {
+                                    const orderId = order._id || order.id;
                                     return (
-                                        <tr key={order.id} className="hover:bg-blue-50 transition-colors">
-                                            <td className="px-6 py-4 text-sm font-medium text-[#a34610]">{order.id}</td>
+                                        <tr key={orderId} className="hover:bg-blue-50 transition-colors">
+                                            <td className="px-6 py-4 text-sm font-medium text-[#a34610]">
+                                                {orderId.slice(-8)}
+                                            </td>
                                             <td className="px-6 py-4">
                                                 <div>
-                                                    <div className="text-sm font-medium text-[#a34610]">{order.customer}</div>
-                                                    <div className="text-sm text-">{order.email}</div>
+                                                    <div className="text-sm font-medium text-[#a34610]">{order.name}</div>
+                                                    <div className="text-sm text-gray-600">{order.phone}</div>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 text-sm text-[#a34610]">{order.product}</td>
+                                            <td className="px-6 py-4 text-sm text-[#a34610]">{order.contentTitle}</td>
                                             <td className="px-6 py-4 text-sm text-[#a34610]">{order.quantity}</td>
-                                            <td className="px-6 py-4 text-sm font-semibold text-[#a34610]">৳{order.amount.toFixed(2)}</td>
-                                            <td className="px-6 py-4 text-sm text-[#a34610]">{order.date}</td>
+                                            <td className="px-6 py-4">
+                                                <div className="text-sm font-semibold text-[#a34610]">৳{order.totalPrice.toFixed(2)}</div>
+                                                {order.savings > 0 && (
+                                                    <div className="text-xs text-green-600">Saved: ৳{order.savings.toFixed(2)}</div>
+                                                )}
+                                            </td>
+                                            <td className="px-6 py-4 text-sm text-[#a34610]">
+                                                {formatDate(order.createdAt)}
+                                            </td>
                                             <td className="px-6 py-4">
                                                 <select
                                                     value={order.status}
-                                                    onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                                                    onChange={(e) => updateOrderStatus(orderId, e.target.value)}
                                                     className={`px-3 py-1 rounded-lg text-xs font-semibold border ${statusConfig[order.status].color} outline-none cursor-pointer`}
                                                 >
                                                     <option value="pending">Pending</option>
+                                                    <option value="confirmed">Confirmed</option>
                                                     <option value="processing">Processing</option>
                                                     <option value="shipped">Shipped</option>
                                                     <option value="delivered">Delivered</option>
                                                     <option value="cancelled">Cancelled</option>
                                                 </select>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <span className={`px-2 py-1 rounded text-xs font-semibold ${paymentStatusConfig[order.paymentStatus].color}`}>
+                                                    {paymentStatusConfig[order.paymentStatus].label}
+                                                </span>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <button
@@ -251,6 +363,7 @@ const OrderList = () => {
                         <div className="text-center py-12 text-gray-500">
                             <Package size={48} className="mx-auto mb-4 text-gray-300" />
                             <p className="text-lg">No orders found</p>
+                            <p className="text-sm mt-2">Orders will appear here when customers place them</p>
                         </div>
                     )}
                 </div>
@@ -258,7 +371,7 @@ const OrderList = () => {
                 {/* Order Details Modal */}
                 {selectedOrder && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={() => setSelectedOrder(null)}>
-                        <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-8" onClick={(e) => e.stopPropagation()}>
+                        <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-8 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
                             <div className="flex items-center justify-between mb-6">
                                 <h2 className="text-2xl font-bold text-[#a34610]">Order Details</h2>
                                 <button onClick={() => setSelectedOrder(null)} className="text-gray-500 hover:text-gray-700">
@@ -268,39 +381,75 @@ const OrderList = () => {
                             <div className="space-y-4">
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <p className="text-sm text-[#a34610]">Order ID</p>
-                                        <p className="text-lg font-semibold text-[#a34610]">{selectedOrder.id}</p>
+                                        <p className="text-sm text-gray-600">Order ID</p>
+                                        <p className="text-lg font-semibold text-[#a34610]">{(selectedOrder._id || selectedOrder.id).slice(-12)}</p>
                                     </div>
                                     <div>
-                                        <p className="text-sm text-[#a34610]">Date</p>
-                                        <p className="text-lg font-semibold text-[#a34610]">{selectedOrder.date}</p>
+                                        <p className="text-sm text-gray-600">Date</p>
+                                        <p className="text-lg font-semibold text-[#a34610]">{formatDate(selectedOrder.createdAt)}</p>
                                     </div>
                                     <div>
-                                        <p className="text-sm text-[#a34610]">Customer</p>
-                                        <p className="text-lg font-semibold text-[#a34610]">{selectedOrder.customer}</p>
+                                        <p className="text-sm text-gray-600">Customer</p>
+                                        <p className="text-lg font-semibold text-[#a34610]">{selectedOrder.name}</p>
                                     </div>
                                     <div>
-                                        <p className="text-sm text-[#a34610]">Email</p>
-                                        <p className="text-lg font-semibold text-[#a34610]">{selectedOrder.email}</p>
+                                        <p className="text-sm text-gray-600">Phone</p>
+                                        <p className="text-lg font-semibold text-[#a34610]">{selectedOrder.phone}</p>
+                                    </div>
+                                    <div className="col-span-2">
+                                        <p className="text-sm text-gray-600">Address</p>
+                                        <p className="text-lg font-semibold text-[#a34610]">{selectedOrder.address}</p>
                                     </div>
                                     <div>
-                                        <p className="text-sm text-[#a34610]">Product</p>
-                                        <p className="text-lg font-semibold text-[#a34610]">{selectedOrder.product}</p>
+                                        <p className="text-sm text-gray-600">Product</p>
+                                        <p className="text-lg font-semibold text-[#a34610]">{selectedOrder.contentTitle}</p>
                                     </div>
                                     <div>
-                                        <p className="text-sm text-[#a34610]">Quantity</p>
+                                        <p className="text-sm text-gray-600">Quantity</p>
                                         <p className="text-lg font-semibold text-[#a34610]">{selectedOrder.quantity}</p>
                                     </div>
                                     <div>
-                                        <p className="text-sm text-[#a34610]">Amount</p>
-                                        <p className="text-lg font-semibold text-green-600">${selectedOrder.amount.toFixed(2)}</p>
+                                        <p className="text-sm text-gray-600">Unit Price</p>
+                                        <p className="text-lg font-semibold text-[#a34610]">৳{selectedOrder.price.toFixed(2)}</p>
                                     </div>
                                     <div>
-                                        <p className="text-sm text-[#a34610]">Status</p>
+                                        <p className="text-sm text-gray-600">Total Amount</p>
+                                        <p className="text-lg font-semibold text-green-600">৳{selectedOrder.totalPrice.toFixed(2)}</p>
+                                    </div>
+                                    {selectedOrder.savings > 0 && (
+                                        <>
+                                            <div>
+                                                <p className="text-sm text-gray-600">Original Price</p>
+                                                <p className="text-lg font-semibold text-gray-500 line-through">৳{selectedOrder.originalPrice.toFixed(2)}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm text-gray-600">Savings</p>
+                                                <p className="text-lg font-semibold text-green-600">৳{selectedOrder.savings.toFixed(2)}</p>
+                                            </div>
+                                        </>
+                                    )}
+                                    <div>
+                                        <p className="text-sm text-gray-600">Status</p>
                                         <span className={`inline-block px-3 py-1 rounded-lg text-sm font-semibold border ${statusConfig[selectedOrder.status].color}`}>
                                             {statusConfig[selectedOrder.status].label}
                                         </span>
                                     </div>
+                                    <div>
+                                        <p className="text-sm text-gray-600">Payment Status</p>
+                                        <span className={`inline-block px-3 py-1 rounded-lg text-sm font-semibold ${paymentStatusConfig[selectedOrder.paymentStatus].color}`}>
+                                            {paymentStatusConfig[selectedOrder.paymentStatus].label}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-600">Payment Method</p>
+                                        <p className="text-lg font-semibold text-[#a34610] capitalize">{selectedOrder.paymentMethod.replace('_', ' ')}</p>
+                                    </div>
+                                    {selectedOrder.notes && (
+                                        <div className="col-span-2">
+                                            <p className="text-sm text-gray-600">Notes</p>
+                                            <p className="text-lg font-semibold text-[#a34610]">{selectedOrder.notes}</p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
