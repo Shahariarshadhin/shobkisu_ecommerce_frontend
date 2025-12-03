@@ -79,7 +79,7 @@ export default function DashboardLayout({ children }) {
               } bg-slate-900 text-white transition-all duration-300 flex flex-col`}
             >
               {/* Logo */}
-              <div className="p-4 border-b border-slate-800">
+              <Link href="/" className="p-4 border-b border-slate-800">
                 <div className="flex items-center gap-3">
                   <div className="w-16 h-16">
                     <Image
@@ -94,7 +94,7 @@ export default function DashboardLayout({ children }) {
                     <span className="font-semibold text-lg">সব কিছু</span>
                   )}
                 </div>
-              </div>
+              </Link>
 
               {/* Navigation */}
               <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
