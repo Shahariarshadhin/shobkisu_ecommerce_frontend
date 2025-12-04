@@ -11,6 +11,8 @@ import {
   ChevronDown,
   LogOut,
   User,
+  Layers,
+  Megaphone,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -26,7 +28,7 @@ export default function DashboardLayout({ children }) {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [orderMenuOpen, setOrderMenuOpen] = useState(false);
   const [advertiseMenuOpen, setAdvertiseMenuOpen] = useState(false);
-  
+
   const dispatch = useDispatch();
   const router = useRouter();
   const { user } = useSelector((state) => state.auth);
@@ -48,21 +50,33 @@ export default function DashboardLayout({ children }) {
       ],
     },
     {
-      icon: BarChart3,
+      icon: Megaphone,
       label: "Advertisement",
       hasSubmenu: true,
       submenu: [
-        { label: "Create Advertisement", link: "/dashboard/advertise/create-advertisement-content" },
-        { label: "Advertisement List", link: "/dashboard/advertise/advertise-list" },
+        {
+          label: "Create Advertisement",
+          link: "/dashboard/advertise/create-advertisement-content",
+        },
+        {
+          label: "Advertisement List",
+          link: "/dashboard/advertise/advertise-list",
+        },
       ],
     },
-    { icon: Users, label: "Users", link: "/dashboard/users", roles: ["admin", "super_admin"] },
+    {
+      icon: Users,
+      label: "Users",
+      link: "/dashboard/users",
+      roles: ["admin", "super_admin"],
+    },
+    { icon: Layers, label: "Brand Management", link: "/dashboard/brands" },
     { icon: FileText, label: "Projects", link: "/dashboard/projects" },
     { icon: Settings, label: "Settings", link: "/dashboard/settings" },
   ];
 
   // Filter nav items based on user role
-  const filteredNavItems = navItems.filter(item => {
+  const filteredNavItems = navItems.filter((item) => {
     if (!item.roles) return true;
     return user && item.roles.includes(user.role);
   });
@@ -119,12 +133,15 @@ export default function DashboardLayout({ children }) {
                           <item.icon size={20} />
                           {sidebarOpen && (
                             <>
-                              <span className="flex-1 text-left">{item.label}</span>
+                              <span className="flex-1 text-left">
+                                {item.label}
+                              </span>
                               <ChevronDown
                                 size={16}
                                 className={`transition-transform ${
                                   (item.label === "Order" && orderMenuOpen) ||
-                                  (item.label === "Advertisement" && advertiseMenuOpen)
+                                  (item.label === "Advertisement" &&
+                                    advertiseMenuOpen)
                                     ? "rotate-180"
                                     : ""
                                 }`}
@@ -136,7 +153,8 @@ export default function DashboardLayout({ children }) {
                         {/* Submenu */}
                         {item.hasSubmenu &&
                           ((item.label === "Order" && orderMenuOpen) ||
-                            (item.label === "Advertisement" && advertiseMenuOpen)) &&
+                            (item.label === "Advertisement" &&
+                              advertiseMenuOpen)) &&
                           sidebarOpen && (
                             <div className="mt-2 ml-4 space-y-1">
                               {item.submenu.map((subItem) => (
@@ -179,8 +197,12 @@ export default function DashboardLayout({ children }) {
                   </div>
                   {sidebarOpen && (
                     <div className="flex-1">
-                      <p className="text-sm font-medium">{user?.name || "User"}</p>
-                      <p className="text-xs text-gray-400 capitalize">{user?.role || "user"}</p>
+                      <p className="text-sm font-medium">
+                        {user?.name || "User"}
+                      </p>
+                      <p className="text-xs text-gray-400 capitalize">
+                        {user?.role || "user"}
+                      </p>
                     </div>
                   )}
                 </div>
