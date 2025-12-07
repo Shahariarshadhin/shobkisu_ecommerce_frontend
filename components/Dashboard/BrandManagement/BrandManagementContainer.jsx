@@ -1,139 +1,71 @@
 "use client"
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+
+import {
+  clearNotification,
+  createBrand,
+  deleteBrand,
+  fetchBrands,
+  setSearchTerm,
+  toggleBrandStatus,
+  updateBrand
+} from '../../../redux/brandSlice';
+import SearchBar from '../SharedUI/SearchBar';
+import Toast from '../SharedUI/Toast';
 import BrandFormModal from './BrandFormModal';
 import BrandsGrid from './BrandsGrid';
 import DeleteConfirmModal from './DeleteConfirmModal';
-import SearchBar from '../SharedUI/SearchBar';
-import Toast from '../SharedUI/Toast';
 
+export default function BrandManagementContainer() {
+  const dispatch = useDispatch();
+  
+  // Safe selector with fallback values
+  const brandsState = useSelector((state) => state.brands);
+  const filteredBrands = brandsState?.filteredBrands || [];
+  const loading = brandsState?.loading || false;
+  const notification = brandsState?.notification || null;
+  const searchTerm = brandsState?.searchTerm || '';
 
-
-const API_BASE_URL = 'http://localhost:5000/api/brands';
-
-export default function BrandManagement() {
-  const [brands, setBrands] = useState([]);
-  const [filteredBrands, setFilteredBrands] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [editingBrand, setEditingBrand] = useState(null);
   const [deletingBrand, setDeletingBrand] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [notification, setNotification] = useState(null);
 
   useEffect(() => {
-    fetchBrands();
-  }, []);
+    dispatch(fetchBrands());
+  }, [dispatch]);
 
   useEffect(() => {
-    const filtered = brands.filter(brand =>
-      brand.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      brand.description?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setFilteredBrands(filtered);
-  }, [searchTerm, brands]);
-
-  const fetchBrands = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(API_BASE_URL);
-      const data = await response.json();
-      if (data.success) {
-        setBrands(data.data);
-        setFilteredBrands(data.data);
-      }
-    } catch (error) {
-      showNotification('Failed to fetch brands', 'error');
-    } finally {
-      setLoading(false);
+    if (notification) {
+      const timer = setTimeout(() => {
+        dispatch(clearNotification());
+      }, 3000);
+      return () => clearTimeout(timer);
     }
+  }, [notification, dispatch]);
+
+  const handleSearchChange = (value) => {
+    dispatch(setSearchTerm(value));
   };
 
-  const showNotification = (message, type = 'success') => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 3000);
-  };
-
-  const handleToggleStatus = async (brand) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/${brand._id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...brand, isActive: !brand.isActive })
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        showNotification(
-          `Brand ${!brand.isActive ? 'activated' : 'deactivated'} successfully!`,
-          'success'
-        );
-        fetchBrands();
-      } else {
-        showNotification(data.message || 'Failed to update status', 'error');
-      }
-    } catch (error) {
-      showNotification('An error occurred', 'error');
-    }
+  const handleToggleStatus = (brand) => {
+    dispatch(toggleBrandStatus(brand));
   };
 
   const handleFormSubmit = async (formData) => {
-    setLoading(true);
-
-    try {
-      const url = editingBrand ? `${API_BASE_URL}/${editingBrand._id}` : API_BASE_URL;
-      const method = editingBrand ? 'PUT' : 'POST';
-
-      const response = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        showNotification(
-          editingBrand ? 'Brand updated successfully!' : 'Brand created successfully!',
-          'success'
-        );
-        fetchBrands();
-        closeModal();
-      } else {
-        showNotification(data.message || 'Operation failed', 'error');
-      }
-    } catch (error) {
-      showNotification('An error occurred', 'error');
-    } finally {
-      setLoading(false);
+    if (editingBrand) {
+      await dispatch(updateBrand({ id: editingBrand._id, brandData: formData }));
+    } else {
+      await dispatch(createBrand(formData));
     }
+    closeModal();
   };
 
   const handleDelete = async () => {
     if (!deletingBrand) return;
-    
-    setLoading(true);
-    try {
-      const response = await fetch(`${API_BASE_URL}/${deletingBrand._id}`, {
-        method: 'DELETE'
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        showNotification('Brand deleted successfully!', 'success');
-        fetchBrands();
-        setIsDeleteModalOpen(false);
-        setDeletingBrand(null);
-      } else {
-        showNotification(data.message || 'Delete failed', 'error');
-      }
-    } catch (error) {
-      showNotification('An error occurred', 'error');
-    } finally {
-      setLoading(false);
-    }
+    await dispatch(deleteBrand(deletingBrand._id));
+    closeDeleteModal();
   };
 
   const openModal = (brand = null) => {
@@ -162,7 +94,7 @@ export default function BrandManagement() {
 
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-[#a34610]">
+          <h1 className="text-4xl font-bold text-gray-800 mb-2 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
             Brand Management
           </h1>
           <p className="text-gray-600">Manage your brands with ease</p>
@@ -170,7 +102,7 @@ export default function BrandManagement() {
 
         <SearchBar
           searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
+          onSearchChange={handleSearchChange}
           onAddClick={() => openModal()}
           placeholder="Search brands..."
           addButtonText="Add Brand"

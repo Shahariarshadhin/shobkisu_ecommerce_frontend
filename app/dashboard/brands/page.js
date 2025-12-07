@@ -1,11 +1,15 @@
-import BrandManagement from "../../../components/Dashboard/BrandManagement/BrandManagementContainer";
+'use client'
+import { Provider } from 'react-redux'
 
-const page = () => {
+import BrandManagement from "../../../components/Dashboard/BrandManagement/BrandManagementContainer";
+import { store } from '../../../redux/store';
+
+const Page = () => {
   return (
-    <div>
+    <Provider store={store}>
       <BrandManagement />
-    </div>
+    </Provider>
   );
 };
 
-export default page;
+export default Page;
