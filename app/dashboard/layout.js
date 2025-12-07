@@ -13,6 +13,11 @@ import {
   User,
   Layers,
   Megaphone,
+  Package,
+  PlusCircle,
+  List,
+  Tag,
+  Grid3x3,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -28,6 +33,7 @@ export default function DashboardLayout({ children }) {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [orderMenuOpen, setOrderMenuOpen] = useState(false);
   const [advertiseMenuOpen, setAdvertiseMenuOpen] = useState(false);
+  const [productConfigMenuOpen, setProductConfigMenuOpen] = useState(false);
 
   const dispatch = useDispatch();
   const router = useRouter();
@@ -45,8 +51,8 @@ export default function DashboardLayout({ children }) {
       label: "Order",
       hasSubmenu: true,
       submenu: [
-        { label: "Create Order", link: "/dashboard/order/create" },
-        { label: "Orders", link: "/dashboard/order" },
+        { label: "Create Order", link: "/dashboard/order/create", icon: PlusCircle },
+        { label: "Orders", link: "/dashboard/order", icon: List },
       ],
     },
     {
@@ -57,10 +63,12 @@ export default function DashboardLayout({ children }) {
         {
           label: "Create Advertisement",
           link: "/dashboard/advertise/create-advertisement-content",
+          icon: PlusCircle,
         },
         {
           label: "Advertisement List",
           link: "/dashboard/advertise/advertise-list",
+          icon: List,
         },
       ],
     },
@@ -70,7 +78,23 @@ export default function DashboardLayout({ children }) {
       link: "/dashboard/users",
       roles: ["admin", "super_admin"],
     },
-    { icon: Layers, label: "Brand Management", link: "/dashboard/brands" },
+    {
+      icon: Package,
+      label: "Product Config",
+      hasSubmenu: true,
+      submenu: [
+        {
+          label: "Brand Management",
+          link: "/dashboard/brands",
+          icon: Tag,
+        },
+        {
+          label: "Model Management",
+          link: "/dashboard/models",
+          icon: Grid3x3,
+        },
+      ],
+    },
     { icon: FileText, label: "Projects", link: "/dashboard/projects" },
     { icon: Settings, label: "Settings", link: "/dashboard/settings" },
   ];
@@ -122,6 +146,8 @@ export default function DashboardLayout({ children }) {
                               setOrderMenuOpen(!orderMenuOpen);
                             } else if (item.label === "Advertisement") {
                               setAdvertiseMenuOpen(!advertiseMenuOpen);
+                            } else if (item.label === "Product Config") {
+                              setProductConfigMenuOpen(!productConfigMenuOpen);
                             }
                           }}
                           className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
@@ -141,7 +167,9 @@ export default function DashboardLayout({ children }) {
                                 className={`transition-transform ${
                                   (item.label === "Order" && orderMenuOpen) ||
                                   (item.label === "Advertisement" &&
-                                    advertiseMenuOpen)
+                                    advertiseMenuOpen) ||
+                                  (item.label === "Product Config" &&
+                                    productConfigMenuOpen)
                                     ? "rotate-180"
                                     : ""
                                 }`}
@@ -154,7 +182,9 @@ export default function DashboardLayout({ children }) {
                         {item.hasSubmenu &&
                           ((item.label === "Order" && orderMenuOpen) ||
                             (item.label === "Advertisement" &&
-                              advertiseMenuOpen)) &&
+                              advertiseMenuOpen) ||
+                            (item.label === "Product Config" &&
+                              productConfigMenuOpen)) &&
                           sidebarOpen && (
                             <div className="mt-2 ml-4 space-y-1">
                               {item.submenu.map((subItem) => (
@@ -163,7 +193,9 @@ export default function DashboardLayout({ children }) {
                                   href={subItem.link}
                                   className="w-full flex items-center gap-2 px-4 py-2 rounded-lg text-sm text-gray-300 hover:bg-slate-800 transition-colors"
                                 >
-                                  <div className="w-1.5 h-1.5 bg-gray-500 rounded-full"></div>
+                                  {subItem.icon && (
+                                    <subItem.icon size={16} className="text-gray-400" />
+                                  )}
                                   <span>{subItem.label}</span>
                                 </Link>
                               ))}

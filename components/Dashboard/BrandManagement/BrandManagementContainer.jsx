@@ -94,7 +94,7 @@ export default function BrandManagementContainer() {
 
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold text-[#a34610] mb-2">
             Brand Management
           </h1>
           <p className="text-gray-600">Manage your brands with ease</p>
