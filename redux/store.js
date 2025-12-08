@@ -4,6 +4,7 @@ import authReducer from "./authSlice";
 import brandReducer from "./brandSlice";
 import modelReducer from "./modelSlice";
 import colorReducer from "./colorSlice";
+import storageReducer from "./storageSlice";
 
 export const store = configureStore({
   reducer: { 
@@ -11,6 +12,7 @@ export const store = configureStore({
     auth: authReducer,
     brands: brandReducer,
     models: modelReducer,
-    colors: colorReducer 
+    colors: colorReducer,
+    storage: storageReducer,
   },
 });

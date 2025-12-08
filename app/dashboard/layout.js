@@ -93,6 +93,16 @@ export default function DashboardLayout({ children }) {
           link: "/dashboard/models",
           icon: Grid3x3,
         },
+        {
+          label: "Color Management",
+          link: "/dashboard/colors",
+          icon: Grid3x3,
+        },
+        {
+          label: "Storage Management",
+          link: "/dashboard/storages",
+          icon: Grid3x3,
+        },
       ],
     },
     { icon: FileText, label: "Projects", link: "/dashboard/projects" },
