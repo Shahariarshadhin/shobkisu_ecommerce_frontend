@@ -105,7 +105,7 @@ export default function ModelManagement() {
           placeholder="Search models or brands..."
           addButtonText="Add Model"
           addButtonIcon={Package}
-          buttonClassName="bg-gradient-to-r from-blue-600 to-cyan-600"
+          buttonClassName="bg-gradient-to-br from-[#C8AF9C] to-[#a34610]"
         />
 
         <ModelsGrid
