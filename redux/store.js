@@ -5,6 +5,7 @@ import brandReducer from "./brandSlice";
 import modelReducer from "./modelSlice";
 import colorReducer from "./colorSlice";
 import storageReducer from "./storageSlice";
+import simReducer from "./simSlice";
 
 export const store = configureStore({
   reducer: { 
@@ -14,5 +15,6 @@ export const store = configureStore({
     models: modelReducer,
     colors: colorReducer,
     storage: storageReducer,
+    sims: simReducer,
   },
 });

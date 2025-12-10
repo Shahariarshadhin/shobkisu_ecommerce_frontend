@@ -1,32 +1,34 @@
 "use client";
 import {
-  Home,
   BarChart3,
-  Users,
-  Settings,
-  FileText,
   Bell,
-  Search,
-  Menu,
   ChevronDown,
-  LogOut,
-  User,
-  Layers,
-  Megaphone,
-  Package,
-  PlusCircle,
-  List,
-  Tag,
+  Database,
+  FileText,
   Grid3x3,
+  Home,
+  List,
+  LogOut,
+  Megaphone,
+  Menu,
+  Package,
+  Palette,
+  PlusCircle,
+  Search,
+  Settings,
+  Smartphone,
+  Tag,
+  User,
+  Users
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useRouter } from "next/navigation";
 
-import { logout } from "../../redux/authSlice";
 import ProtectedRoute from "../../components/ProtectedRoute";
+import { logout } from "../../redux/authSlice";
 
 export default function DashboardLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -51,7 +53,11 @@ export default function DashboardLayout({ children }) {
       label: "Order",
       hasSubmenu: true,
       submenu: [
-        { label: "Create Order", link: "/dashboard/order/create", icon: PlusCircle },
+        {
+          label: "Create Order",
+          link: "/dashboard/order/create",
+          icon: PlusCircle,
+        },
         { label: "Orders", link: "/dashboard/order", icon: List },
       ],
     },
@@ -96,12 +102,17 @@ export default function DashboardLayout({ children }) {
         {
           label: "Color Management",
           link: "/dashboard/colors",
-          icon: Grid3x3,
+          icon: Palette,
         },
         {
           label: "Storage Management",
           link: "/dashboard/storages",
-          icon: Grid3x3,
+          icon: Database,
+        },
+        {
+          label: "SIM Management",
+          link: "/dashboard/sim-network",
+          icon: Smartphone,
         },
       ],
     },
@@ -204,7 +215,10 @@ export default function DashboardLayout({ children }) {
                                   className="w-full flex items-center gap-2 px-4 py-2 rounded-lg text-sm text-gray-300 hover:bg-slate-800 transition-colors"
                                 >
                                   {subItem.icon && (
-                                    <subItem.icon size={16} className="text-gray-400" />
+                                    <subItem.icon
+                                      size={16}
+                                      className="text-gray-400"
+                                    />
                                   )}
                                   <span>{subItem.label}</span>
                                 </Link>
