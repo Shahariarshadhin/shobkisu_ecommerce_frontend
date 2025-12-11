@@ -16,10 +16,11 @@ import {
   PlusCircle,
   Search,
   Settings,
+  Shield,
   Smartphone,
   Tag,
   User,
-  Users
+  Users,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -118,6 +119,11 @@ export default function DashboardLayout({ children }) {
           label: "Device Condition Management",
           link: "/dashboard/device-conditions",
           icon: Smartphone,
+        },
+        {
+          label: "Warranty Management",
+          link: "/dashboard/warranties",
+          icon: Shield,
         },
       ],
     },

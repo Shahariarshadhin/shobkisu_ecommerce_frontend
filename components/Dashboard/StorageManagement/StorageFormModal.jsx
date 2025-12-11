@@ -172,7 +172,7 @@ const StorageFormModal = ({ isOpen, editingStorage, onClose, onSubmit, loading }
                                 (formData.ram === 'custom' && !customRAM.trim()) ||
                                 (formData.rom === 'custom' && !customROM.trim())
                             }
-                            className="flex-1 px-4 py-2 bg-gradient-to-br from-[#C8AF9C] to-[#a34610] text-white rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="flex-1 px-4 py-2 bg-linear-to-br from-[#C8AF9C] to-[#a34610] text-white rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {loading ? 'Saving...' : editingStorage ? 'Update' : 'Create'}
                         </button>

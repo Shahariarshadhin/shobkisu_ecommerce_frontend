@@ -4,9 +4,9 @@ import { Edit2, Trash2, Package } from 'lucide-react';
 const ModelCard = ({ model, onEdit, onDelete, onToggleStatus }) => {
   return (
     <div className="bg-white rounded-2xl shadow-sm hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 overflow-hidden">
-      <div className="h-2  bg-gradient-to-br from-[#C8AF9C] to-[#a34610]"></div>
+      <div className="h-2  bg-linear-to-br from-[#C8AF9C] to-[#a34610]"></div>
       <div className="p-6">
-        <div className="w-16 h-16 mb-4 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-xl flex items-center justify-center">
+        <div className="w-16 h-16 mb-4 bg-linear-to-br from-blue-100 to-cyan-100 rounded-xl flex items-center justify-center">
           <Package className="text-blue-600" size={32} />
         </div>
         <h3 className="text-xl font-bold text-gray-800 mb-1">{model.name}</h3>

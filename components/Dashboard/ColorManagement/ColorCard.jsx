@@ -3,7 +3,7 @@ import { Edit2, Palette, Trash2 } from 'lucide-react';
 const ColorCard = ({ color, onEdit, onDelete, onToggleStatus }) => {
   return (
     <div className="bg-white rounded-2xl shadow-sm hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 overflow-hidden">
-     <div className="h-2 bg-gradient-to-br from-[#C8AF9C] to-[#a34610]"></div>
+     <div className="h-2 bg-linear-to-br from-[#C8AF9C] to-[#a34610]"></div>
       <div className="p-6">
         <div className="flex items-center gap-4 mb-4">
           <div 

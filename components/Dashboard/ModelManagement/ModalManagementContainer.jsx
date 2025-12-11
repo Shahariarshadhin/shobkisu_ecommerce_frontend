@@ -87,7 +87,7 @@ export default function ModelManagement() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-teal-50 p-6">
+    <div className="min-h-screen bg-linear-to-br from-blue-50 via-cyan-50 to-teal-50 p-6">
       <Toast notification={notification} />
 
       <div className="max-w-7xl mx-auto">
@@ -105,7 +105,7 @@ export default function ModelManagement() {
           placeholder="Search models or brands..."
           addButtonText="Add Model"
           addButtonIcon={Package}
-          buttonClassName="bg-gradient-to-br from-[#C8AF9C] to-[#a34610]"
+          buttonClassName="bg-linear-to-br from-[#C8AF9C] to-[#a34610]"
         />
 
         <ModelsGrid

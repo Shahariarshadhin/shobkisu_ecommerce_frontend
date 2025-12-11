@@ -1,9 +1,9 @@
-import AdvertiseContentList from "../../../../components/Dashboard/ContentManagement/AdvertiseContentList";
+import AdvertiseContentManager from "../../../../components/Dashboard/ContentManagement/AdvertiseContentManager";
 
 const page = () => {
   return (
     <div>
-      <AdvertiseContentList />
+      <AdvertiseContentManager />
     </div>
   );
 };

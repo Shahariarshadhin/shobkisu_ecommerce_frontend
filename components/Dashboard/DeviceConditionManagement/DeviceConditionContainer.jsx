@@ -89,7 +89,7 @@ export default function DeviceConditionManagementContainer() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-green-50 p-6">
+        <div className="min-h-screen bg-linear-to-br from-emerald-50 via-teal-50 to-green-50 p-6">
             <Toast notification={notification} />
 
             <div className="max-w-7xl mx-auto">
@@ -107,7 +107,7 @@ export default function DeviceConditionManagementContainer() {
                     placeholder="Search device conditions..."
                     addButtonText="Add Condition"
                     addButtonIcon={CheckCircle}
-                    buttonClassName="bg-gradient-to-br from-[#C8AF9C] to-[#a34610]"
+                    buttonClassName="bg-linear-to-br from-[#C8AF9C] to-[#a34610]"
                 />
 
                 <DeviceConditionsGrid

@@ -183,7 +183,7 @@ export default function UserListPage() {
       <div className="bg-white rounded-lg shadow-lg p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-[#C8AF9C] to-[#a34610] rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-linear-to-br from-[#C8AF9C] to-[#a34610] rounded-lg flex items-center justify-center">
               <Users className="text-white" size={24} />
             </div>
             <div>
@@ -250,7 +250,7 @@ export default function UserListPage() {
                 <tr key={user._id} className="hover:bg-gray-50 transition">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center">
+                      <div className="w-10 h-10 bg-linear-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center">
                         <span className="text-white font-semibold">
                           {user.name.charAt(0).toUpperCase()}
                         </span>

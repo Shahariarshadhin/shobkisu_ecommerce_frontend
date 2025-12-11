@@ -104,7 +104,7 @@ const BrandFormModal = ({ isOpen, editingBrand, onClose, onSubmit, loading }) =>
                         <button
                             onClick={handleSubmit}
                             disabled={loading || !formData.name.trim()}
-                            className="flex-1 px-4 py-2 bg-gradient-to-br from-[#C8AF9C] to-[#a34610] text-white rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="flex-1 px-4 py-2 bg-linear-to-br from-[#C8AF9C] to-[#a34610] text-white rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {loading ? 'Saving...' : editingBrand ? 'Update' : 'Create'}
                         </button>

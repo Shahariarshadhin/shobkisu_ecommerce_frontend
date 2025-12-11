@@ -113,7 +113,7 @@ export default function StorageManagement() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 p-6">
+        <div className="min-h-screen bg-linear-to-br from-orange-50 via-amber-50 to-yellow-50 p-6">
             <Toast notification={notification} />
 
             <div className="max-w-7xl mx-auto">
@@ -133,7 +133,7 @@ export default function StorageManagement() {
                     placeholder="Search RAM or ROM..."
                     addButtonText="Add Storage"
                     addButtonIcon={HardDrive}
-                     buttonClassName="bg-gradient-to-br from-[#C8AF9C] to-[#a34610]"
+                     buttonClassName="bg-linear-to-br from-[#C8AF9C] to-[#a34610]"
                 />
 
                 <StorageGrid

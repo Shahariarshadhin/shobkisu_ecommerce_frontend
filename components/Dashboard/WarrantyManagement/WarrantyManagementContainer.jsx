@@ -1,39 +1,39 @@
 "use client"
-import { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 
-import { Smartphone } from 'lucide-react';
 import {
     clearNotification,
-    createSim,
-    deleteSim,
-    fetchSims,
+    createWarranty,
+    deleteWarranty,
+    fetchWarranties,
     setSearchTerm,
-    toggleSimStatus,
-    updateSim
-} from '../../../redux/simSlice';
+    toggleWarrantyStatus,
+    updateWarranty
+} from '../../../redux/warrantySlice';
+import { Shield } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import Toast from '../SharedUI/Toast';
 import SearchBar from '../SharedUI/SearchBar';
-import SimsGrid from './SimsGrid';
-import SimFormModal from './SimFormModal';
+import WarrantiesGrid from './WarrantiesGrid';
+import WarrantyFormModal from './WarrantyFormModal';
 import DeleteConfirmModal from '../BrandManagement/DeleteConfirmModal';
 
-export default function SimManagementContainer() {
+export default function WarrantyManagement() {
     const dispatch = useDispatch();
     const {
-        filteredSims = [],
+        filteredWarranties = [],
         loading = false,
         notification = null,
         searchTerm = ''
-    } = useSelector((state) => state.sims || {});
+    } = useSelector((state) => state.warranties || {});
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [editingSim, setEditingSim] = useState(null);
-    const [deletingSim, setDeletingSim] = useState(null);
+    const [editingWarranty, setEditingWarranty] = useState(null);
+    const [deletingWarranty, setDeletingWarranty] = useState(null);
 
     useEffect(() => {
-        dispatch(fetchSims());
+        dispatch(fetchWarranties());
     }, [dispatch]);
 
     useEffect(() => {
@@ -46,72 +46,72 @@ export default function SimManagementContainer() {
     }, [notification, dispatch]);
 
     const handleFormSubmit = async (formData) => {
-        if (editingSim) {
-            await dispatch(updateSim({ id: editingSim._id, simData: formData }));
+        if (editingWarranty) {
+            await dispatch(updateWarranty({ id: editingWarranty._id, warrantyData: formData }));
         } else {
-            await dispatch(createSim(formData));
+            await dispatch(createWarranty(formData));
         }
         closeModal();
     };
 
     const handleDelete = async () => {
-        if (!deletingSim) return;
-        await dispatch(deleteSim(deletingSim._id));
+        if (!deletingWarranty) return;
+        await dispatch(deleteWarranty(deletingWarranty._id));
         closeDeleteModal();
     };
 
-    const handleToggleStatus = async (sim) => {
-        await dispatch(toggleSimStatus(sim));
+    const handleToggleStatus = async (warranty) => {
+        await dispatch(toggleWarrantyStatus(warranty));
     };
 
     const handleSearch = (term) => {
         dispatch(setSearchTerm(term));
     };
 
-    const openModal = (sim = null) => {
-        setEditingSim(sim);
+    const openModal = (warranty = null) => {
+        setEditingWarranty(warranty);
         setIsModalOpen(true);
     };
 
     const closeModal = () => {
         setIsModalOpen(false);
-        setEditingSim(null);
+        setEditingWarranty(null);
     };
 
-    const openDeleteModal = (sim) => {
-        setDeletingSim(sim);
+    const openDeleteModal = (warranty) => {
+        setDeletingWarranty(warranty);
         setIsDeleteModalOpen(true);
     };
 
     const closeDeleteModal = () => {
         setIsDeleteModalOpen(false);
-        setDeletingSim(null);
+        setDeletingWarranty(null);
     };
 
     return (
-        <div className="min-h-screen bg-linear-to-br from-indigo-50 via-violet-50 to-purple-50 p-6">
+        <div className="min-h-screen bg-linear-to-br from-sky-50 via-blue-50 to-cyan-50 p-6">
             <Toast notification={notification} />
 
             <div className="max-w-7xl mx-auto">
                 <div className="mb-8">
-                    <h1 className="text-4xl font-bold text-[#a34610] mb-2">
-                        SIM Management
+                       <h1 className="text-4xl font-bold text-[#a34610] mb-2">
+                        Warranty Management
                     </h1>
-                    <p className="text-gray-600">Manage SIM card types and configurations</p>
+                    <p className="text-gray-600">Manage warranty types and durations</p>
                 </div>
 
                 <SearchBar
                     searchTerm={searchTerm}
                     onSearchChange={handleSearch}
                     onAddClick={() => openModal()}
-                    placeholder="Search SIM types..."
-                    addButtonText="Add SIM Type"
-                    addButtonIcon={Smartphone}
-                     buttonClassName="bg-linear-to-br from-[#C8AF9C] to-[#a34610]"
+                    placeholder="Search warranties..."
+                    addButtonText="Add Warranty"
+                    addButtonIcon={Shield}
+                      buttonClassName="bg-linear-to-br from-[#C8AF9C] to-[#a34610]"
                 />
 
-                <SimsGrid
-                    sims={filteredSims}
+                <WarrantiesGrid
+                    warranties={filteredWarranties}
                     loading={loading}
                     onEdit={openModal}
                     onDelete={openDeleteModal}
@@ -119,9 +119,9 @@ export default function SimManagementContainer() {
                 />
             </div>
 
-            <SimFormModal
+            <WarrantyFormModal
                 isOpen={isModalOpen}
-                editingSim={editingSim}
+                editingWarranty={editingWarranty}
                 onClose={closeModal}
                 onSubmit={handleFormSubmit}
                 loading={loading}
@@ -129,7 +129,7 @@ export default function SimManagementContainer() {
 
             <DeleteConfirmModal
                 isOpen={isDeleteModalOpen}
-                sim={deletingSim}
+                warranty={deletingWarranty}
                 onClose={closeDeleteModal}
                 onConfirm={handleDelete}
                 loading={loading}

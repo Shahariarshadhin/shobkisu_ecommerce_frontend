@@ -27,7 +27,7 @@ const SearchBar = ({
       {showAddButton && onAddClick && (
         <button
           onClick={onAddClick}
-          className={`flex items-center gap-2 px-6 py-3 bg-gradient-to-br from-[#C8AF9C] to-[#a34610] text-white rounded-xl hover:shadow-lg transform hover:scale-105 transition-all duration-200 ${buttonClassName}`}
+          className={`flex items-center gap-2 px-6 py-3 bg-linear-to-br from-[#C8AF9C] to-[#a34610] text-white rounded-xl hover:shadow-lg transform hover:scale-105 transition-all duration-200 ${buttonClassName}`}
         >
           <AddIcon size={20} />
           {addButtonText}

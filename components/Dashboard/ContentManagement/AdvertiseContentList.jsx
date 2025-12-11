@@ -1,20 +1,15 @@
 "use client"
+import { useState, useEffect } from 'react';
 
-import { useEffect, useState } from 'react';
-import { Edit, Trash2, Eye, Clock, Calendar, Tag } from 'lucide-react';
-
-const AdvertiseContentList = ({ onEdit }) => {
+// AdvertiseContentList Component
+const AdvertiseContentList = ({ onEdit, refreshTrigger }) => {
     const [contents, setContents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [filter, setFilter] = useState('all'); // all, active, expired
-    const [sortBy, setSortBy] = useState('recent'); // recent, ending-soon
+    const [filter, setFilter] = useState('all');
+    const [sortBy, setSortBy] = useState('recent');
 
     const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
-
-    useEffect(() => {
-        fetchContents();
-    }, [filter, sortBy]);
 
     const fetchContents = async () => {
         setLoading(true);
@@ -23,7 +18,6 @@ const AdvertiseContentList = ({ onEdit }) => {
         try {
             let url = `${API_BASE_URL}/advertise-contents`;
             
-            // Add query parameters
             const params = new URLSearchParams();
             if (filter === 'active') params.append('status', 'active');
             if (sortBy === 'ending-soon') params.append('sort', 'ending-soon');
@@ -48,6 +42,10 @@ const AdvertiseContentList = ({ onEdit }) => {
         }
     };
 
+    useEffect(() => {
+        fetchContents();
+    }, [filter, sortBy, refreshTrigger]);
+
     const handleDelete = async (id) => {
         if (!window.confirm('Are you sure you want to delete this content?')) {
             return;
@@ -62,7 +60,7 @@ const AdvertiseContentList = ({ onEdit }) => {
 
             if (response.ok) {
                 alert(data.message || 'Content deleted successfully');
-                fetchContents(); // Refresh the list
+                fetchContents();
             } else {
                 alert(data.message || 'Failed to delete content');
             }
@@ -97,20 +95,17 @@ const AdvertiseContentList = ({ onEdit }) => {
         );
     };
 
-    // Get active discounts
     const getActiveDiscounts = (discountShows) => {
         if (!discountShows || discountShows.length === 0) return [];
         
-        // Handle both old format (array of strings) and new format (array of objects)
         return discountShows
             .filter(discount => {
                 if (typeof discount === 'string') return true;
-                return discount.isActive !== false; // Show if isActive is true or undefined
+                return discount.isActive !== false;
             })
             .map(discount => typeof discount === 'string' ? discount : discount.text);
     };
 
-    // Count active sections
     const countActiveSections = (content) => {
         let count = 0;
         ['section1', 'section2', 'section3', 'section4', 'section5'].forEach(key => {
@@ -135,7 +130,6 @@ const AdvertiseContentList = ({ onEdit }) => {
             <div className="mb-6">
                 <h2 className="text-2xl font-bold text-gray-800 mb-4">Advertise Contents</h2>
                 
-                {/* Filters and Sort */}
                 <div className="flex flex-wrap gap-4">
                     <div>
                         <label className="text-sm font-medium text-gray-700 mr-2">Filter:</label>
@@ -182,7 +176,6 @@ const AdvertiseContentList = ({ onEdit }) => {
                         
                         return (
                             <div key={content._id || content.id} className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition">
-                                {/* Thumbnail */}
                                 {content.thumbImage && (
                                     <img
                                         src={content.thumbImage}
@@ -195,25 +188,21 @@ const AdvertiseContentList = ({ onEdit }) => {
                                 )}
                                 
                                 <div className="p-4">
-                                    {/* Title */}
                                     <h3 className="text-lg font-semibold text-gray-800 mb-2 truncate">
                                         {content.title}
                                     </h3>
                                     
-                                    {/* Slug */}
                                     {content.slug && (
                                         <p className="text-xs text-gray-500 mb-3 font-mono truncate">
                                             /{content.slug}
                                         </p>
                                     )}
                                     
-                                    {/* Active Discount Tags */}
                                     {activeDiscounts.length > 0 && (
                                         <div className="flex flex-wrap gap-2 mb-3">
                                             {activeDiscounts.slice(0, 2).map((discount, idx) => (
                                                 <span key={idx} className="bg-red-500 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
-                                                    <Tag size={12} />
-                                                    {discount}
+                                                    🏷️ {discount}
                                                 </span>
                                             ))}
                                             {activeDiscounts.length > 2 && (
@@ -224,19 +213,15 @@ const AdvertiseContentList = ({ onEdit }) => {
                                         </div>
                                     )}
                                     
-                                    {/* Time Info */}
                                     <div className="space-y-2 mb-4 text-sm">
                                         <div className="flex items-center text-gray-600">
-                                            <Calendar size={16} className="mr-2" />
-                                            <span className="text-xs">Ends: {formatDate(content.offerEndTime)}</span>
+                                            📅 <span className="text-xs ml-2">Ends: {formatDate(content.offerEndTime)}</span>
                                         </div>
                                         <div className="flex items-center">
-                                            <Clock size={16} className="mr-2 text-gray-600" />
-                                            {getTimeRemainingDisplay(content.timeRemaining)}
+                                            ⏰ <span className="ml-2">{getTimeRemainingDisplay(content.timeRemaining)}</span>
                                         </div>
                                     </div>
 
-                                    {/* Stats */}
                                     <div className="flex flex-wrap gap-3 mb-4 text-xs text-gray-600">
                                         <span className="flex items-center gap-1">
                                             📷 {content.regularImages?.filter(img => img).length || 0} images
@@ -249,20 +234,18 @@ const AdvertiseContentList = ({ onEdit }) => {
                                         </span>
                                     </div>
                                     
-                                    {/* Action Buttons */}
                                     <div className="flex gap-2">
                                         <button
                                             onClick={() => onEdit(content)}
                                             className="flex-1 bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-1 text-sm"
                                         >
-                                            <Edit size={16} />
-                                            Edit
+                                            ✏️ Edit
                                         </button>
                                         <button
                                             onClick={() => handleDelete(content._id || content.id)}
                                             className="bg-red-600 text-white px-3 py-2 rounded-lg hover:bg-red-700 transition"
                                         >
-                                            <Trash2 size={16} />
+                                            🗑️
                                         </button>
                                     </div>
                                 </div>
