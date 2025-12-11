@@ -114,6 +114,11 @@ export default function DashboardLayout({ children }) {
           link: "/dashboard/sim-network",
           icon: Smartphone,
         },
+        {
+          label: "Device Condition Management",
+          link: "/dashboard/device-conditions",
+          icon: Smartphone,
+        },
       ],
     },
     { icon: FileText, label: "Projects", link: "/dashboard/projects" },

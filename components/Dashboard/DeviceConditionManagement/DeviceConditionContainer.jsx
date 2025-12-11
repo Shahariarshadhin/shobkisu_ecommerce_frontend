@@ -1,39 +1,39 @@
 "use client"
-import { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 
-import { Smartphone } from 'lucide-react';
 import {
     clearNotification,
-    createSim,
-    deleteSim,
-    fetchSims,
+    createDeviceCondition,
+    deleteDeviceCondition,
+    fetchDeviceConditions,
     setSearchTerm,
-    toggleSimStatus,
-    updateSim
-} from '../../../redux/simSlice';
+    toggleDeviceConditionStatus,
+    updateDeviceCondition
+} from '../../../redux/deviceConditionSlice';
+import { CheckCircle } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import Toast from '../SharedUI/Toast';
 import SearchBar from '../SharedUI/SearchBar';
-import SimsGrid from './SimsGrid';
-import SimFormModal from './SimFormModal';
+import DeviceConditionsGrid from './DeviceConditionsGrid';
 import DeleteConfirmModal from '../BrandManagement/DeleteConfirmModal';
+import DeviceConditionFormModal from './DeviceConditionFormModal';
 
-export default function SimManagementContainer() {
+export default function DeviceConditionManagementContainer() {
     const dispatch = useDispatch();
     const {
-        filteredSims = [],
+        filteredConditions = [],
         loading = false,
         notification = null,
         searchTerm = ''
-    } = useSelector((state) => state.sims || {});
+    } = useSelector((state) => state.deviceConditions || {});
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [editingSim, setEditingSim] = useState(null);
-    const [deletingSim, setDeletingSim] = useState(null);
+    const [editingCondition, setEditingCondition] = useState(null);
+    const [deletingCondition, setDeletingCondition] = useState(null);
 
     useEffect(() => {
-        dispatch(fetchSims());
+        dispatch(fetchDeviceConditions());
     }, [dispatch]);
 
     useEffect(() => {
@@ -46,72 +46,72 @@ export default function SimManagementContainer() {
     }, [notification, dispatch]);
 
     const handleFormSubmit = async (formData) => {
-        if (editingSim) {
-            await dispatch(updateSim({ id: editingSim._id, simData: formData }));
+        if (editingCondition) {
+            await dispatch(updateDeviceCondition({ id: editingCondition._id, conditionData: formData }));
         } else {
-            await dispatch(createSim(formData));
+            await dispatch(createDeviceCondition(formData));
         }
         closeModal();
     };
 
     const handleDelete = async () => {
-        if (!deletingSim) return;
-        await dispatch(deleteSim(deletingSim._id));
+        if (!deletingCondition) return;
+        await dispatch(deleteDeviceCondition(deletingCondition._id));
         closeDeleteModal();
     };
 
-    const handleToggleStatus = async (sim) => {
-        await dispatch(toggleSimStatus(sim));
+    const handleToggleStatus = async (condition) => {
+        await dispatch(toggleDeviceConditionStatus(condition));
     };
 
     const handleSearch = (term) => {
         dispatch(setSearchTerm(term));
     };
 
-    const openModal = (sim = null) => {
-        setEditingSim(sim);
+    const openModal = (condition = null) => {
+        setEditingCondition(condition);
         setIsModalOpen(true);
     };
 
     const closeModal = () => {
         setIsModalOpen(false);
-        setEditingSim(null);
+        setEditingCondition(null);
     };
 
-    const openDeleteModal = (sim) => {
-        setDeletingSim(sim);
+    const openDeleteModal = (condition) => {
+        setDeletingCondition(condition);
         setIsDeleteModalOpen(true);
     };
 
     const closeDeleteModal = () => {
         setIsDeleteModalOpen(false);
-        setDeletingSim(null);
+        setDeletingCondition(null);
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-violet-50 to-purple-50 p-6">
+        <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-green-50 p-6">
             <Toast notification={notification} />
 
             <div className="max-w-7xl mx-auto">
                 <div className="mb-8">
-                    <h1 className="text-4xl font-bold text-[#a34610] mb-2">
-                        SIM Management
+                     <h1 className="text-4xl font-bold text-[#a34610] mb-2">
+                        Device Condition Management
                     </h1>
-                    <p className="text-gray-600">Manage SIM card types and configurations</p>
+                    <p className="text-gray-600">Manage device condition types and descriptions</p>
                 </div>
 
                 <SearchBar
                     searchTerm={searchTerm}
                     onSearchChange={handleSearch}
                     onAddClick={() => openModal()}
-                    placeholder="Search SIM types..."
-                    addButtonText="Add SIM Type"
-                    addButtonIcon={Smartphone}
-                     buttonClassName="bg-gradient-to-br from-[#C8AF9C] to-[#a34610]"
+                    placeholder="Search device conditions..."
+                    addButtonText="Add Condition"
+                    addButtonIcon={CheckCircle}
+                    buttonClassName="bg-gradient-to-br from-[#C8AF9C] to-[#a34610]"
                 />
 
-                <SimsGrid
-                    sims={filteredSims}
+                <DeviceConditionsGrid
+                    conditions={filteredConditions}
                     loading={loading}
                     onEdit={openModal}
                     onDelete={openDeleteModal}
@@ -119,9 +119,9 @@ export default function SimManagementContainer() {
                 />
             </div>
 
-            <SimFormModal
+            <DeviceConditionFormModal
                 isOpen={isModalOpen}
-                editingSim={editingSim}
+                editingCondition={editingCondition}
                 onClose={closeModal}
                 onSubmit={handleFormSubmit}
                 loading={loading}
@@ -129,7 +129,7 @@ export default function SimManagementContainer() {
 
             <DeleteConfirmModal
                 isOpen={isDeleteModalOpen}
-                sim={deletingSim}
+                condition={deletingCondition}
                 onClose={closeDeleteModal}
                 onConfirm={handleDelete}
                 loading={loading}

@@ -6,6 +6,7 @@ import modelReducer from "./modelSlice";
 import colorReducer from "./colorSlice";
 import storageReducer from "./storageSlice";
 import simReducer from "./simSlice";
+import deviceConditionReducer from "./deviceConditionSlice";
 
 export const store = configureStore({
   reducer: { 
@@ -16,5 +17,6 @@ export const store = configureStore({
     colors: colorReducer,
     storage: storageReducer,
     sims: simReducer,
+    deviceConditions: deviceConditionReducer
   },
 });

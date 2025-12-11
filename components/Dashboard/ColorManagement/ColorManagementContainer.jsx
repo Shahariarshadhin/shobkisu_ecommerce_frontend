@@ -88,7 +88,7 @@ export default function ColorManagement() {
 
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2 bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">
+           <h1 className="text-4xl font-bold text-[#a34610] mb-2">
             Color Management
           </h1>
           <p className="text-gray-600">Manage your product colors with ease</p>
@@ -101,7 +101,7 @@ export default function ColorManagement() {
           placeholder="Search colors or hex codes..."
           addButtonText="Add Color"
           addButtonIcon={Palette}
-          buttonClassName="bg-gradient-to-r from-pink-600 to-rose-600"
+          buttonClassName="bg-gradient-to-br from-[#C8AF9C] to-[#a34610]"
         />
 
         <ColorsGrid
