@@ -8,6 +8,7 @@ import storageReducer from "./storageSlice";
 import simReducer from "./simSlice";
 import deviceConditionReducer from "./deviceConditionSlice";
 import warrantyReducer from "./warrantySlice";
+import productReducer from "./productSlice";
 
 export const store = configureStore({
   reducer: { 
@@ -20,5 +21,6 @@ export const store = configureStore({
     sims: simReducer,
     deviceConditions: deviceConditionReducer,
     warranties: warrantyReducer,
+    products: productReducer,
   },
 });
