@@ -37,6 +37,8 @@ export default function DashboardLayout({ children }) {
   const [orderMenuOpen, setOrderMenuOpen] = useState(false);
   const [advertiseMenuOpen, setAdvertiseMenuOpen] = useState(false);
   const [productConfigMenuOpen, setProductConfigMenuOpen] = useState(false);
+  const [productManagementMenuOpen, setProductManagementMenuOpen] =
+    useState(false);
 
   const dispatch = useDispatch();
   const router = useRouter();
@@ -84,6 +86,24 @@ export default function DashboardLayout({ children }) {
       label: "Users",
       link: "/dashboard/users",
       roles: ["admin", "super_admin"],
+    },
+    {
+      icon: Package,
+      label: "Product Management",
+      hasSubmenu: true,
+      submenu: [
+        {
+          label: "Create Product",
+          link: "/dashboard/products/create-product",
+          icon: Tag,
+        },
+        {
+          label: "Product List",
+          link: "/dashboard/products",
+          icon: Grid3x3,
+        },
+        
+      ],
     },
     {
       icon: Package,
@@ -178,6 +198,10 @@ export default function DashboardLayout({ children }) {
                               setOrderMenuOpen(!orderMenuOpen);
                             } else if (item.label === "Advertisement") {
                               setAdvertiseMenuOpen(!advertiseMenuOpen);
+                            } else if (item.label === "Product Management") {
+                              setProductManagementMenuOpen(
+                                !productManagementMenuOpen
+                              );
                             } else if (item.label === "Product Config") {
                               setProductConfigMenuOpen(!productConfigMenuOpen);
                             }
@@ -201,7 +225,9 @@ export default function DashboardLayout({ children }) {
                                   (item.label === "Advertisement" &&
                                     advertiseMenuOpen) ||
                                   (item.label === "Product Config" &&
-                                    productConfigMenuOpen)
+                                    productConfigMenuOpen) ||
+                                  (item.label === "Product Management" &&
+                                    productManagementMenuOpen)
                                     ? "rotate-180"
                                     : ""
                                 }`}
@@ -216,7 +242,9 @@ export default function DashboardLayout({ children }) {
                             (item.label === "Advertisement" &&
                               advertiseMenuOpen) ||
                             (item.label === "Product Config" &&
-                              productConfigMenuOpen)) &&
+                              productConfigMenuOpen) ||
+                            (item.label === "Product Management" &&
+                              productManagementMenuOpen)) &&
                           sidebarOpen && (
                             <div className="mt-2 ml-4 space-y-1">
                               {item.submenu.map((subItem) => (
