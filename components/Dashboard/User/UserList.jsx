@@ -352,7 +352,7 @@ export default function UserListPage() {
                 <button
                   onClick={confirmEdit}
                   disabled={actionLoading}
-                  className="flex-1 px-4 py-2 bg-gradient-to-r from-[#C8AF9C] to-[#a34610] text-white rounded-lg hover:shadow-lg disabled:opacity-50"
+                  className="flex-1 px-4 py-2 bg-linear-to-r from-[#C8AF9C] to-[#a34610] text-white rounded-lg hover:shadow-lg disabled:opacity-50"
                 >
                   {actionLoading ? 'Saving...' : 'Save'}
                 </button>

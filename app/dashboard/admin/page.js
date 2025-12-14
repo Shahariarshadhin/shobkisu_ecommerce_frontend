@@ -33,7 +33,7 @@ export default function AdminPage() {
       <div className="max-w-4xl mx-auto">
         <div className="bg-white rounded-lg shadow-lg p-8">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-linear-to-br from-purple-500 to-blue-600 rounded-lg flex items-center justify-center">
               <ShieldCheck className="text-white" size={24} />
             </div>
             <div>
@@ -108,7 +108,7 @@ export default function AdminPage() {
               <button
                 onClick={handleSubmit}
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-purple-500 to-blue-600 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition disabled:opacity-50"
+                className="w-full bg-linear-to-r from-purple-500 to-blue-600 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition disabled:opacity-50"
               >
                 {loading ? 'Creating...' : 'Create Admin'}
               </button>

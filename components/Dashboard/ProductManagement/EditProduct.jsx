@@ -312,14 +312,14 @@ export default function EditProduct() {
 
     if (loading && !currentProduct) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50 p-6 flex items-center justify-center">
+            <div className="min-h-screen bg-linear-to-br from-purple-50 via-pink-50 to-rose-50 p-6 flex items-center justify-center">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50 p-6">
+        <div className="min-h-screen bg-linear-to-br from-purple-50 via-pink-50 to-rose-50 p-6">
             {notification && <Toast notification={notification} />}
 
             <div className="max-w-6xl mx-auto">
@@ -332,7 +332,7 @@ export default function EditProduct() {
                 </button>
 
                 <div className="bg-white rounded-2xl shadow-lg p-8">
-                    <h1 className="text-3xl font-bold text-gray-800 mb-6 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                    <h1 className="text-4xl font-bold text-[#a34610] mb-2">
                         Edit Product
                     </h1>
 
@@ -977,7 +977,7 @@ export default function EditProduct() {
                             <button
                                 type="submit"
                                 disabled={loading || !isFormValid()}
-                                className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:shadow-lg disabled:opacity-50"
+                                className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-linear-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:shadow-lg disabled:opacity-50"
                             >
                                 <Save size={20} />
                                 {loading ? 'Updating...' : 'Update Product'}

@@ -21,7 +21,7 @@ const ProductCard = ({ product, onEdit, onDelete, onToggleStatus }) => {
           -{discount}%
         </div>
       )}
-      <div className="h-2 bg-gradient-to-r from-purple-600 to-pink-600"></div>
+      <div className="h-2 bg-linear-to-r from-purple-600 to-pink-600"></div>
       
       <div className="relative h-48 bg-gray-100 flex items-center justify-center overflow-hidden">
         {product.thumbnailImage ? (

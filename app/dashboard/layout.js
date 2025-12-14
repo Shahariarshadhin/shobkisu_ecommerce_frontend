@@ -285,7 +285,7 @@ export default function DashboardLayout({ children }) {
               {/* User Profile */}
               <div className="p-4 border-t border-slate-800">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center">
+                  <div className="w-10 h-10 bg-linear-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center">
                     <span className="text-white font-semibold text-lg">
                       {user?.name?.charAt(0).toUpperCase() || "U"}
                     </span>
@@ -345,7 +345,7 @@ export default function DashboardLayout({ children }) {
                       onClick={() => setUserMenuOpen(!userMenuOpen)}
                       className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded-lg transition-colors"
                     >
-                      <div className="w-8 h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center">
+                      <div className="w-8 h-8 bg-linear-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center">
                         <span className="text-white font-semibold text-sm">
                           {user?.name?.charAt(0).toUpperCase() || "U"}
                         </span>

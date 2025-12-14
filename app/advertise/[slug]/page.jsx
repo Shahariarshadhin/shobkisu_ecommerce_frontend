@@ -206,7 +206,7 @@ export default function DynamicAdvertisePage() {
 
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Thumbnail Image Section */}
-        <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 md:p-8 mb-8 border-4 border-green-600">
+        <div className="bg-linear-to-br from-green-50 to-green-100 rounded-lg p-4 md:p-8 mb-8 border-4 border-green-600">
           <div className="bg-white rounded-lg p-4 md:p-6 mb-4">
             {content.thumbImage ? (
               <img 
@@ -218,7 +218,7 @@ export default function DynamicAdvertisePage() {
                 }}
               />
             ) : (
-              <div className="bg-gradient-to-br from-gray-200 to-gray-300 rounded-lg aspect-video flex items-center justify-center">
+              <div className="bg-linear-to-br from-gray-200 to-gray-300 rounded-lg aspect-video flex items-center justify-center">
                 <Package className="w-24 h-24 text-gray-400" />
               </div>
             )}
@@ -287,7 +287,7 @@ export default function DynamicAdvertisePage() {
             <div className="bg-teal-700 text-white text-center py-3 rounded-t-lg">
               <span className="font-bold text-xl">{data.title}</span>
             </div>
-            <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-b-lg border-4 border-teal-700">
+            <div className="bg-linear-to-br from-green-50 to-green-100 p-6 rounded-b-lg border-4 border-teal-700">
               <div className="text-gray-800 text-lg whitespace-pre-line">
                 {data.content}
               </div>
