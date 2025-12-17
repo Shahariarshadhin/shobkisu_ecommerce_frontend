@@ -1,3 +1,4 @@
+import CartModal from "../components/Dashboard/SharedUI/CartModal";
 import LayoutWrapper from "../components/Landing/LayoutWrapper";
 import "./globals.css";
 import { ReduxProvider } from "./providers";
@@ -12,7 +13,10 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body>
         <LayoutWrapper>
-          <ReduxProvider>{children}</ReduxProvider>
+          <ReduxProvider>
+            {children}
+            <CartModal />
+          </ReduxProvider>
         </LayoutWrapper>
       </body>
     </html>

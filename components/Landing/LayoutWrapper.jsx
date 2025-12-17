@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import Navbar from "../Layout/Navbar";
 import Footer from "../Layout/Footer";
+import { ReduxProvider } from "../../app/providers";
 
 export default function LayoutWrapper({ children }) {
   const pathname = usePathname();
@@ -15,9 +16,12 @@ export default function LayoutWrapper({ children }) {
 
   return (
     <>
-      {!shouldHide && <Navbar />}
-      {children}
-      {!shouldHide && <Footer />}
+      <ReduxProvider>
+        {!shouldHide && <Navbar />}
+        {children}
+        {!shouldHide && <Footer />}
+      </ReduxProvider>
+
     </>
   );
 }

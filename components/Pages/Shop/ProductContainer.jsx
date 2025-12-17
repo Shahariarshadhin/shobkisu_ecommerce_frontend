@@ -1,7 +1,8 @@
+
 "use client"
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { ShoppingCart, X, Filter, Search, ChevronDown, ChevronUp, Grid3x3, LayoutGrid, Rows3, List, Tally2, Tally3, Tally4, Tally5  } from 'lucide-react';
+import { ShoppingCart, Filter, Search, ChevronDown, ChevronUp, List, Tally2, Tally3, Tally4, Tally5, Columns } from 'lucide-react';
 import { fetchProducts } from '../../../redux/productSlice';
 import { fetchBrands } from '../../../redux/brandSlice';
 import { fetchModels } from '../../../redux/modelSlice';
@@ -9,11 +10,14 @@ import { fetchColors } from '../../../redux/colorSlice';
 import { fetchDeviceConditions } from '../../../redux/deviceConditionSlice';
 import { fetchSims } from '../../../redux/simSlice';
 import { fetchStorage } from '../../../redux/storageSlice';
-import { fetchWarranties } from '../../../redux/warrantySlice'; 
+import { fetchWarranties } from '../../../redux/warrantySlice';
+import { addItem } from '../../../redux/cartSlice';
+import { openCart } from '../../../redux/uiSlice';
+import CartSidebar from '../../../app/cart/page'; 
 
 export default function ProductContainer() {
     const dispatch = useDispatch();
-    
+
     // Redux state
     const { products = [], loading: productsLoading } = useSelector((state) => state.products || {});
     const { brands = [] } = useSelector((state) => state.brands || {});
@@ -23,10 +27,11 @@ export default function ProductContainer() {
     const { sims = [] } = useSelector((state) => state.sims || {});
     const { storage = [] } = useSelector((state) => state.storage || {});
     const { warranties = [] } = useSelector((state) => state.warranties || {});
+    const cartItems = useSelector((state) => state.cart.items);
 
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [showFilters, setShowFilters] = useState(false);
-    
+
     // Filter states
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedBrands, setSelectedBrands] = useState([]);
@@ -51,7 +56,7 @@ export default function ProductContainer() {
         warranties: false
     });
 
-    const [viewMode, setViewMode] = useState('grid-3'); // list, grid-2, grid-3, grid-4, grid-5
+    const [viewMode, setViewMode] = useState('grid-3');
 
     useEffect(() => {
         dispatch(fetchProducts({ page: 1, limit: 100 }));
@@ -66,19 +71,16 @@ export default function ProductContainer() {
 
     useEffect(() => {
         applyFilters();
-    }, [products, searchTerm, selectedBrands, selectedModels, selectedColors, 
+    }, [products, searchTerm, selectedBrands, selectedModels, selectedColors,
         selectedConditions, selectedSims, selectedStorage, selectedWarranties,
         priceRange, sortBy, stockFilter]);
 
     const applyFilters = () => {
         let filtered = [...products];
-
-        // Only show active products
         filtered = filtered.filter(p => p.isActive);
 
-        // Search filter
         if (searchTerm) {
-            filtered = filtered.filter(p => 
+            filtered = filtered.filter(p =>
                 p.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 p.brandId?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 p.modelId?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -86,55 +88,39 @@ export default function ProductContainer() {
             );
         }
 
-        // Brand filter
         if (selectedBrands.length > 0) {
             filtered = filtered.filter(p => selectedBrands.includes(p.brandId?._id));
         }
-
-        // Model filter
         if (selectedModels.length > 0) {
             filtered = filtered.filter(p => selectedModels.includes(p.modelId?._id));
         }
-
-        // Color filter
         if (selectedColors.length > 0) {
             filtered = filtered.filter(p => selectedColors.includes(p.colorId?._id));
         }
-
-        // Condition filter
         if (selectedConditions.length > 0) {
             filtered = filtered.filter(p => selectedConditions.includes(p.conditionId?._id));
         }
-
-        // SIM filter
         if (selectedSims.length > 0) {
             filtered = filtered.filter(p => selectedSims.includes(p.simId?._id));
         }
-
-        // Storage filter
         if (selectedStorage.length > 0) {
             filtered = filtered.filter(p => selectedStorage.includes(p.storageId?._id));
         }
-
-        // Warranty filter
         if (selectedWarranties.length > 0) {
             filtered = filtered.filter(p => selectedWarranties.includes(p.warrantyId?._id));
         }
 
-        // Price range filter
         filtered = filtered.filter(p => {
             const price = parseFloat(p.pricing?.sellingPrice || 0);
             return price >= priceRange.min && price <= priceRange.max;
         });
 
-        // Stock filter
         if (stockFilter === 'instock') {
             filtered = filtered.filter(p => p.stock > 0);
         } else if (stockFilter === 'outofstock') {
             filtered = filtered.filter(p => p.stock === 0);
         }
 
-        // Sort
         switch (sortBy) {
             case 'price-low':
                 filtered.sort((a, b) => parseFloat(a.pricing?.sellingPrice || 0) - parseFloat(b.pricing?.sellingPrice || 0));
@@ -153,7 +139,7 @@ export default function ProductContainer() {
     };
 
     const toggleFilter = (filterId, selectedArray, setSelectedArray) => {
-        setSelectedArray(prev => 
+        setSelectedArray(prev =>
             prev.includes(filterId) ? prev.filter(id => id !== filterId) : [...prev, filterId]
         );
     };
@@ -179,8 +165,26 @@ export default function ProductContainer() {
         setStockFilter('all');
     };
 
-    const activeFiltersCount = selectedBrands.length + selectedModels.length + 
-        selectedColors.length + selectedConditions.length + selectedSims.length + 
+    const handleAddToCart = (product) => {
+        if (product.stock === 0) {
+            alert('This product is out of stock');
+            return;
+        }
+
+        dispatch(addItem(product));
+
+        // Show success notification
+        const notification = document.createElement('div');
+        notification.className = 'fixed top-20 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in';
+        notification.textContent = '✓ Added to cart!';
+        document.body.appendChild(notification);
+        setTimeout(() => {
+            notification.remove();
+        }, 2000);
+    };
+
+    const activeFiltersCount = selectedBrands.length + selectedModels.length +
+        selectedColors.length + selectedConditions.length + selectedSims.length +
         selectedStorage.length + selectedWarranties.length + (stockFilter !== 'all' ? 1 : 0);
 
     const FilterSection = ({ title, items, selected, onToggle, sectionKey, labelKey = 'name' }) => {
@@ -236,10 +240,8 @@ export default function ProductContainer() {
 
     const ProductCard = ({ product }) => {
         if (viewMode === 'list') {
-            // List View
             return (
                 <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 flex">
-                    {/* Product Image */}
                     <div className="relative w-48 h-48 bg-gray-100 flex-shrink-0">
                         <img
                             src={product.thumbnailImage || 'https://via.placeholder.com/400'}
@@ -260,7 +262,6 @@ export default function ProductContainer() {
                         )}
                     </div>
 
-                    {/* Product Info */}
                     <div className="flex-1 p-5 flex flex-col justify-between">
                         <div>
                             <div className="flex items-start justify-between mb-2">
@@ -284,7 +285,6 @@ export default function ProductContainer() {
                                 </div>
                             </div>
 
-                            {/* Product Details */}
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs text-gray-600 mb-3">
                                 {product.storageId && (
                                     <div className="bg-gray-50 px-3 py-2 rounded">
@@ -310,25 +310,22 @@ export default function ProductContainer() {
                         </div>
 
                         <div className="flex items-center gap-3">
-                            {/* Stock Info */}
-                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                                product.stock > 10
-                                    ? 'bg-green-100 text-green-800'
-                                    : product.stock > 0
+                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${product.stock > 10
+                                ? 'bg-green-100 text-green-800'
+                                : product.stock > 0
                                     ? 'bg-yellow-100 text-yellow-800'
                                     : 'bg-red-100 text-red-800'
-                            }`}>
+                                }`}>
                                 {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
                             </span>
 
-                            {/* Add to Cart Button */}
                             <button
+                                onClick={() => handleAddToCart(product)}
                                 disabled={product.stock === 0}
-                                className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold transition-colors ${
-                                    product.stock === 0
-                                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                        : 'hover:to-pink-700'
-                                }`}
+                                className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold transition-colors ${product.stock === 0
+                                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                    : 'border border-[#a34610] hover:bg-[#a34610] text-[#a34610] hover:text-white'
+                                    }`}
                             >
                                 <ShoppingCart size={20} />
                                 {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
@@ -339,12 +336,10 @@ export default function ProductContainer() {
             );
         }
 
-        // Grid View (all grid sizes)
         const isCompact = viewMode === 'grid-5';
-        
+
         return (
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                {/* Product Image */}
                 <div className={`relative ${isCompact ? 'h-40' : 'h-64'} bg-gray-100`}>
                     <img
                         src={product.thumbnailImage || 'https://via.placeholder.com/400'}
@@ -365,7 +360,6 @@ export default function ProductContainer() {
                     )}
                 </div>
 
-                {/* Product Info */}
                 <div className={isCompact ? 'p-3' : 'p-5'}>
                     <div className="mb-2">
                         <p className="text-xs text-gray-500 mb-1 truncate">
@@ -376,7 +370,6 @@ export default function ProductContainer() {
                         </h3>
                     </div>
 
-                    {/* Product Details - Only show in larger grids */}
                     {!isCompact && (
                         <div className="text-xs text-gray-600 mb-3 space-y-1">
                             {product.storageId && (
@@ -391,7 +384,6 @@ export default function ProductContainer() {
                         </div>
                     )}
 
-                    {/* Pricing */}
                     <div className={isCompact ? 'mb-2' : 'mb-4'}>
                         {product.pricing?.discountPrice && (
                             <p className={`${isCompact ? 'text-xs' : 'text-sm'} text-gray-500 line-through`}>
@@ -403,27 +395,24 @@ export default function ProductContainer() {
                         </p>
                     </div>
 
-                    {/* Stock Info */}
                     <div className={isCompact ? 'mb-2' : 'mb-4'}>
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                            product.stock > 10
-                                ? 'bg-green-100 text-green-800'
-                                : product.stock > 0
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${product.stock > 10
+                            ? 'bg-green-100 text-green-800'
+                            : product.stock > 0
                                 ? 'bg-yellow-100 text-yellow-800'
                                 : 'bg-red-100 text-red-800'
-                        }`}>
+                            }`}>
                             {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
                         </span>
                     </div>
 
-                    {/* Add to Cart Button */}
                     <button
+                        onClick={() => handleAddToCart(product)}
                         disabled={product.stock === 0}
-                        className={`w-full flex items-center justify-center gap-2 px-4 ${isCompact ? 'py-2 text-sm' : 'py-3'} rounded-lg font-semibold transition-colors ${
-                            product.stock === 0
-                                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                : 'border border-[#a34610] hover:bg-[#a34610] text-[#a34610] hover:text-white'
-                        }`}
+                        className={`w-full flex items-center justify-center gap-2 px-4 ${isCompact ? 'py-2 text-sm' : 'py-3'} rounded-lg font-semibold transition-colors ${product.stock === 0
+                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            : 'border border-[#a34610] hover:bg-[#a34610] text-[#a34610] hover:text-white'
+                            }`}
                     >
                         <ShoppingCart size={isCompact ? 16 : 20} />
                         {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
@@ -434,16 +423,14 @@ export default function ProductContainer() {
     };
 
     return (
-        <div className="min-h-screen bg-linear-to-br from-purple-50 via-pink-50 to-rose-50">
-            {/* Header */}
+        <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50">
             <header className="bg-white shadow-md sticky top-0 z-40">
                 <div className="max-w-7xl mx-auto px-4 py-4">
                     <div className="flex items-center justify-between gap-4">
-                        <h1 className="text-2xl font-bold bg-linear-to-br from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                        <h1 className="text-2xl font-bold bg-gradient-to-br from-purple-600 to-pink-600 bg-clip-text text-transparent">
                             Shop Products
                         </h1>
-                        
-                        {/* Search Bar */}
+
                         <div className="flex-1 max-w-xl relative">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                             <input
@@ -455,25 +442,38 @@ export default function ProductContainer() {
                             />
                         </div>
 
-                        {/* Mobile Filter Toggle */}
-                        <button
-                            onClick={() => setShowFilters(!showFilters)}
-                            className="lg:hidden flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-                        >
-                            <Filter size={20} />
-                            {activeFiltersCount > 0 && (
-                                <span className="bg-pink-500 text-white text-xs px-2 py-0.5 rounded-full">
-                                    {activeFiltersCount}
-                                </span>
-                            )}
-                        </button>
+                        <div className="flex items-center gap-3">
+                            <button
+                                onClick={() => dispatch(openCart())}
+                                className="relative flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all"
+                            >
+                                <ShoppingCart size={20} />
+                                <span className="hidden sm:inline">Cart</span>
+                                {cartItems.length > 0 && (
+                                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-6 h-6 flex items-center justify-center rounded-full font-bold animate-pulse">
+                                        {cartItems.length}
+                                    </span>
+                                )}
+                            </button>
+
+                            <button
+                                onClick={() => setShowFilters(!showFilters)}
+                                className="lg:hidden flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                            >
+                                <Filter size={20} />
+                                {activeFiltersCount > 0 && (
+                                    <span className="bg-purple-500 text-white text-xs px-2 py-0.5 rounded-full">
+                                        {activeFiltersCount}
+                                    </span>
+                                )}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </header>
 
             <div className="max-w-7xl mx-auto px-4 py-8">
                 <div className="flex gap-8">
-                    {/* Filters Sidebar */}
                     <aside className={`${showFilters ? 'block' : 'hidden'} lg:block w-full lg:w-64 flex-shrink-0`}>
                         <div className="bg-white rounded-2xl shadow-lg p-6 sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto">
                             <div className="flex items-center justify-between mb-6">
@@ -492,7 +492,6 @@ export default function ProductContainer() {
                             </div>
 
                             <div className="space-y-6">
-                                {/* Sort By */}
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 mb-2">
                                         Sort By
@@ -509,7 +508,6 @@ export default function ProductContainer() {
                                     </select>
                                 </div>
 
-                                {/* Stock Filter */}
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 mb-2">
                                         Availability
@@ -525,7 +523,6 @@ export default function ProductContainer() {
                                     </select>
                                 </div>
 
-                                {/* Price Range */}
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 mb-2">
                                         Price Range
@@ -546,7 +543,6 @@ export default function ProductContainer() {
                                     </div>
                                 </div>
 
-                                {/* Dynamic Filter Sections */}
                                 <FilterSection
                                     title="Brands"
                                     items={brands}
@@ -610,97 +606,94 @@ export default function ProductContainer() {
                         </div>
                     </aside>
 
-                    {/* Products Grid */}
                     <main className="flex-1">
-                        {/* Results Header with View Toggle */}
                         <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                             <p className="text-gray-600">
                                 Showing <span className="font-semibold">{filteredProducts.length}</span> products
                             </p>
-                            
-                            {/* View Mode Toggle */}
+
                             <div className="flex items-center gap-2 bg-white rounded-lg shadow-md p-1">
                                 <button
                                     onClick={() => setViewMode('list')}
-                                    className={`flex items-center gap-1 px-3 py-2 rounded-md transition-all ${
-                                        viewMode === 'list'
-                                            ? 'bg-linear-to-br from-purple-600 to-pink-600 text-white'
-                                            : 'text-gray-600 hover:bg-gray-100'
-                                    }`}
+                                    className={`flex items-center gap-1 px-3 py-2 rounded-md transition-all ${viewMode === 'list'
+                                        ? 'bg-gradient-to-br from-purple-600 to-pink-600 text-white'
+                                        : 'text-gray-600 hover:bg-gray-100'
+                                        }`}
                                     title="List View"
                                 >
                                     <List size={18} />
-                                    {/* <span className="hidden sm:inline text-sm"></span> */}
                                 </button>
+
                                 <button
                                     onClick={() => setViewMode('grid-2')}
-                                    className={`flex items-center gap-1 px-3 py-2 rounded-md transition-all ${
-                                        viewMode === 'grid-2'
-                                            ? 'bg-linear-to-br from-purple-600 to-pink-600 text-white'
-                                            : 'text-gray-600 hover:bg-gray-100'
-                                    }`}
-                                    title="2 Columns"
-                                >
+                                    className={`flex items-center gap-1 px-3 py-2 rounded-md transition-all ${viewMode === 'grid-2'
+                                        ? 'bg-gradient-to-br from-purple-600 to-pink-600 text-white'
+                                        : 'text-gray-600 hover:bg-gray-100'
+                                        }`}
+                                    title="2 Columns">
                                     <Tally2 size={18} />
-                                    {/* <span className="hidden sm:inline text-sm">2</span> */}
+                                    <span className="text-xs hidden sm:inline">2</span>
                                 </button>
+
                                 <button
                                     onClick={() => setViewMode('grid-3')}
-                                    className={`flex items-center gap-1 px-3 py-2 rounded-md transition-all ${
-                                        viewMode === 'grid-3'
-                                            ? 'bg-linear-to-br from-purple-600 to-pink-600 text-white'
-                                            : 'text-gray-600 hover:bg-gray-100'
-                                    }`}
+                                    className={`flex items-center gap-1 px-3 py-2 rounded-md transition-all ${viewMode === 'grid-3'
+                                        ? 'bg-gradient-to-br from-purple-600 to-pink-600 text-white'
+                                        : 'text-gray-600 hover:bg-gray-100'
+                                        }`}
                                     title="3 Columns"
                                 >
                                     <Tally3 size={18} />
-                                    {/* <span className="hidden sm:inline text-sm">3</span> */}
+                                    <span className="text-xs hidden sm:inline">3</span>
                                 </button>
+
                                 <button
                                     onClick={() => setViewMode('grid-4')}
-                                    className={`flex items-center gap-1 px-3 py-2 rounded-md transition-all ${
-                                        viewMode === 'grid-4'
-                                            ? 'bg-linear-to-br from-purple-600 to-pink-600 text-white'
-                                            : 'text-gray-600 hover:bg-gray-100'
-                                    }`}
+                                    className={`flex items-center gap-1 px-3 py-2 rounded-md transition-all ${viewMode === 'grid-4'
+                                        ? 'bg-gradient-to-br from-purple-600 to-pink-600 text-white'
+                                        : 'text-gray-600 hover:bg-gray-100'
+                                        }`}
                                     title="4 Columns"
                                 >
                                     <Tally4 size={18} />
-                                    {/* <span className="hidden sm:inline text-sm">4</span> */}
+                                    <span className="text-xs hidden sm:inline">4</span>
                                 </button>
+
                                 <button
                                     onClick={() => setViewMode('grid-5')}
-                                    className={`flex items-center gap-1 px-3 py-2 rounded-md transition-all ${
-                                        viewMode === 'grid-5'
-                                            ? 'bg-linear-to-br from-purple-600 to-pink-600 text-white'
-                                            : 'text-gray-600 hover:bg-gray-100'
-                                    }`}
+                                    className={`flex items-center gap-1 px-3 py-2 rounded-md transition-all ${viewMode === 'grid-5'
+                                        ? 'bg-gradient-to-br from-purple-600 to-pink-600 text-white'
+                                        : 'text-gray-600 hover:bg-gray-100'
+                                        }`}
                                     title="5 Columns"
                                 >
                                     <Tally5 size={18} />
-                                    {/* <span className="hidden sm:inline text-sm">5</span> */}
+                                    <span className="text-xs hidden sm:inline">5</span>
                                 </button>
                             </div>
                         </div>
 
-                        {/* Products */}
                         {productsLoading ? (
-                            <div className="flex justify-center items-center py-20">
+                            <div className="flex items-center justify-center py-20">
                                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
                             </div>
                         ) : filteredProducts.length === 0 ? (
-                            <div className="text-center py-20">
-                                <p className="text-gray-500 text-lg">No products found</p>
+                            <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
+                                <div className="text-gray-400 mb-4">
+                                    <Search size={64} className="mx-auto" />
+                                </div>
+                                <h3 className="text-xl font-semibold text-gray-700 mb-2">No products found</h3>
+                                <p className="text-gray-500 mb-6">Try adjusting your filters or search terms</p>
                                 <button
                                     onClick={clearFilters}
-                                    className="mt-4 px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                                    className="px-6 py-2 bg-gradient-to-br from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all"
                                 >
                                     Clear Filters
                                 </button>
                             </div>
                         ) : (
                             <div className={getGridClass()}>
-                                {filteredProducts.map((product) => (
+                                {filteredProducts.map(product => (
                                     <ProductCard key={product._id} product={product} />
                                 ))}
                             </div>
@@ -708,6 +701,24 @@ export default function ProductContainer() {
                     </main>
                 </div>
             </div>
+
+            <CartSidebar />
+
+            <style jsx global>{`
+                @keyframes fade-in {
+                    from {
+                        opacity: 0;
+                        transform: translateY(-10px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+                .animate-fade-in {
+                    animation: fade-in 0.3s ease-out;
+                }
+            `}</style>
         </div>
     );
 }
