@@ -3,7 +3,7 @@
 import { CheckCircle, Clock, Download, Eye, FileSpreadsheet, Package, RefreshCw, Search, Truck, XCircle } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
-const OrderList = () => {
+const AdvertisementOrderList = () => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -559,4 +559,4 @@ const OrderList = () => {
     );
 };
 
-export default OrderList;
+export default AdvertisementOrderList;

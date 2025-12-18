@@ -37,10 +37,18 @@ const NAV_CONFIG = [
   { icon: Home, label: "Dashboard", link: "/dashboard" },
   {
     icon: BarChart3,
+    label: "Regular Order",
+    submenu: [
+      // { label: "Create Order", link: "/dashboard/order/create", icon: PlusCircle },
+      { label: "Regular Orders", link: "/dashboard/regular-order", icon: List },
+    ],
+  },
+  {
+    icon: BarChart3,
     label: "Advertisement Order",
     submenu: [
-      { label: "Create Order", link: "/dashboard/order/create", icon: PlusCircle },
-      { label: "Orders", link: "/dashboard/order", icon: List },
+      // { label: "Create Order", link: "/dashboard/order/create", icon: PlusCircle },
+      { label: "Advertisement Orders", link: "/dashboard/advertise-order", icon: List },
     ],
   },
   {

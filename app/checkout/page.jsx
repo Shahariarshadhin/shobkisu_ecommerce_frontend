@@ -1,17 +1,20 @@
 "use client"
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { CreditCard, Truck, User, Mail, Phone, Package, CheckCircle } from 'lucide-react';
+import { CreditCard, Truck, User, Mail, Phone, Package, CheckCircle, AlertCircle } from 'lucide-react';
 import { clearCart } from '../../redux/cartSlice';
+import { createOrder } from '../../redux/orderSlice'; 
 
 export default function CheckoutComponent() {
   const dispatch = useDispatch();
   const cartItems = useSelector((state) => state.cart.items);
   
   const [step, setStep] = useState(1);
-  const [loading, setLoading] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [orderNumber, setOrderNumber] = useState('');
+  const [error, setError] = useState(null);
+
+  const loading = useSelector((state) => state.orders?.loading);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -45,16 +48,36 @@ export default function CheckoutComponent() {
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
+    // Clear error when user starts typing
+    if (error) setError(null);
   };
 
   const validateStep = (currentStep) => {
     switch(currentStep) {
       case 1:
-        return formData.name && formData.email && formData.phone;
+        if (!formData.name || !formData.email || !formData.phone) {
+          setError('Please fill in all customer information fields');
+          return false;
+        }
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(formData.email)) {
+          setError('Please enter a valid email address');
+          return false;
+        }
+        return true;
       case 2:
-        return formData.street && formData.city && formData.state && formData.zipCode;
+        if (!formData.street || !formData.city || !formData.state || !formData.zipCode) {
+          setError('Please fill in all shipping address fields');
+          return false;
+        }
+        return true;
       case 3:
-        return formData.paymentMethod;
+        if (!formData.paymentMethod) {
+          setError('Please select a payment method');
+          return false;
+        }
+        return true;
       default:
         return true;
     }
@@ -62,22 +85,29 @@ export default function CheckoutComponent() {
 
   const handleNext = () => {
     if (validateStep(step)) {
+      setError(null);
       setStep(step + 1);
-    } else {
-      alert('Please fill in all required fields');
     }
   };
 
   const handleBack = () => {
+    setError(null);
     setStep(step - 1);
   };
 
   const handleSubmitOrder = async () => {
-    setLoading(true);
+    setError(null);
+    
+    // Validate cart is not empty
+    if (!cartItems || cartItems.length === 0) {
+      setError('Your cart is empty. Please add items before placing an order.');
+      return;
+    }
     
     try {
+      // Prepare order data with correct structure
       const orderData = {
-        customerId: '507f1f77bcf86cd799439011',
+        customerId: '507f1f77bcf86cd799439011', // You might want to get this from user auth
         customerInfo: {
           name: formData.name,
           email: formData.email,
@@ -90,42 +120,58 @@ export default function CheckoutComponent() {
           zipCode: formData.zipCode,
           country: formData.country
         },
+        billingAddress: formData.sameAsShipping ? {
+          street: formData.street,
+          city: formData.city,
+          state: formData.state,
+          zipCode: formData.zipCode,
+          country: formData.country
+        } : {
+          street: formData.billingStreet,
+          city: formData.billingCity,
+          state: formData.billingState,
+          zipCode: formData.billingZipCode,
+          country: formData.billingCountry
+        },
         items: cartItems.map(item => ({
           productId: item._id,
-          quantity: item.quantity
+          quantity: item.quantity,
+          price: parseFloat(item.pricing?.sellingPrice || 0)
         })),
         pricing: {
-          subtotal,
-          tax,
-          shippingCost: shipping,
+          subtotal: parseFloat(subtotal.toFixed(2)),
+          tax: parseFloat(tax.toFixed(2)),
+          shippingCost: parseFloat(shipping.toFixed(2)),
           discount: 0,
-          total
+          total: parseFloat(total.toFixed(2))
         },
         paymentMethod: formData.paymentMethod,
+        paymentStatus: 'pending',
+        orderStatus: 'pending',
         notes: {
-          customer: formData.customerNotes
+          customer: formData.customerNotes || ''
         }
       };
 
-      const response = await fetch('/api/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(orderData)
-      });
+      console.log('Submitting order data:', orderData);
+
+      // Use Redux action
+      const result = await dispatch(createOrder(orderData)).unwrap();
       
-      const data = await response.json();
+      console.log('Order created successfully:', result);
       
-      if (data.success) {
-        setOrderNumber(data.data.orderNumber);
-        setOrderSuccess(true);
-        dispatch(clearCart());
-      } else {
-        throw new Error(data.message);
-      }
+      // Set order number and show success
+      setOrderNumber(result.orderNumber);
+      setOrderSuccess(true);
+      dispatch(clearCart());
+      
     } catch (error) {
-      alert(error.message || 'Failed to place order');
-    } finally {
-      setLoading(false);
+      console.error('Order submission error:', error);
+      const errorMessage = typeof error === 'string' ? error : error.message || 'Failed to place order. Please try again.';
+      setError(errorMessage);
+      
+      // Scroll to top to show error
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
@@ -180,6 +226,17 @@ export default function CheckoutComponent() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50 py-8">
       <div className="max-w-6xl mx-auto px-4">
+        {/* Error Display */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-lg flex items-start gap-3 animate-shake">
+            <AlertCircle className="text-red-500 flex-shrink-0 mt-0.5" size={20} />
+            <div>
+              <p className="font-semibold text-red-800">Error</p>
+              <p className="text-red-700 text-sm">{error}</p>
+            </div>
+          </div>
+        )}
+
         {/* Progress Steps */}
         <div className="mb-8">
           <div className="flex items-center justify-between max-w-2xl mx-auto">
@@ -191,7 +248,7 @@ export default function CheckoutComponent() {
             ].map((s, idx) => (
               <div key={s.num} className="flex items-center flex-1">
                 <div className={`flex flex-col items-center flex-1 ${step >= s.num ? 'text-purple-600' : 'text-gray-400'}`}>
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold mb-2 ${
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold mb-2 transition-all ${
                     step >= s.num ? 'bg-purple-600 text-white' : 'bg-gray-200'
                   }`}>
                     <s.icon size={24} />
@@ -199,7 +256,7 @@ export default function CheckoutComponent() {
                   <span className="text-xs font-medium hidden sm:block">{s.label}</span>
                 </div>
                 {idx < 3 && (
-                  <div className={`h-1 flex-1 ${step > s.num ? 'bg-purple-600' : 'bg-gray-200'}`} />
+                  <div className={`h-1 flex-1 transition-all ${step > s.num ? 'bg-purple-600' : 'bg-gray-200'}`} />
                 )}
               </div>
             ))}
@@ -229,6 +286,7 @@ export default function CheckoutComponent() {
                         onChange={handleChange}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
                         placeholder="John Doe"
+                        required
                       />
                     </div>
                     <div>
@@ -244,6 +302,7 @@ export default function CheckoutComponent() {
                           onChange={handleChange}
                           className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
                           placeholder="john@example.com"
+                          required
                         />
                       </div>
                     </div>
@@ -260,6 +319,7 @@ export default function CheckoutComponent() {
                           onChange={handleChange}
                           className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
                           placeholder="+880 1234-567890"
+                          required
                         />
                       </div>
                     </div>
@@ -286,6 +346,7 @@ export default function CheckoutComponent() {
                         onChange={handleChange}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
                         placeholder="123 Main Street, Apt 4B"
+                        required
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
@@ -300,6 +361,7 @@ export default function CheckoutComponent() {
                           onChange={handleChange}
                           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
                           placeholder="Dhaka"
+                          required
                         />
                       </div>
                       <div>
@@ -313,6 +375,7 @@ export default function CheckoutComponent() {
                           onChange={handleChange}
                           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
                           placeholder="Dhaka Division"
+                          required
                         />
                       </div>
                     </div>
@@ -328,6 +391,7 @@ export default function CheckoutComponent() {
                           onChange={handleChange}
                           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
                           placeholder="1200"
+                          required
                         />
                       </div>
                       <div>
@@ -430,7 +494,7 @@ export default function CheckoutComponent() {
                     <div className="bg-gray-50 rounded-lg p-4">
                       <h3 className="font-semibold text-gray-800 mb-2">Payment Method</h3>
                       <p className="text-sm text-gray-600 capitalize">
-                        {formData.paymentMethod.replace('_', ' ')}
+                        {formData.paymentMethod.replace(/_/g, ' ')}
                       </p>
                     </div>
 
@@ -464,7 +528,8 @@ export default function CheckoutComponent() {
                 {step > 1 && (
                   <button
                     onClick={handleBack}
-                    className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-all"
+                    disabled={loading}
+                    className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Back
                   </button>
@@ -480,9 +545,16 @@ export default function CheckoutComponent() {
                   <button
                     onClick={handleSubmitOrder}
                     disabled={loading}
-                    className="flex-1 px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg font-semibold hover:from-green-700 hover:to-green-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg font-semibold hover:from-green-700 hover:to-green-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
-                    {loading ? 'Processing...' : 'Place Order'}
+                    {loading ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      'Place Order'
+                    )}
                   </button>
                 )}
               </div>

@@ -1,90 +1,156 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
+// API Base URL - change this to match your Express server
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
 // Async thunks
 export const fetchOrders = createAsyncThunk(
   'orders/fetchAll',
-  async (params = {}) => {
-    const queryParams = new URLSearchParams(params).toString();
-    const response = await fetch(`/api/orders?${queryParams}`);
-    const data = await response.json();
-    if (!data.success) throw new Error(data.message);
-    return data;
+  async (params = {}, { rejectWithValue }) => {
+    try {
+      const queryParams = new URLSearchParams(params).toString();
+      const response = await fetch(`${API_BASE_URL}/api/orders?${queryParams}`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      if (!data.success) throw new Error(data.message);
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
   }
 );
 
 export const fetchOrderById = createAsyncThunk(
   'orders/fetchById',
-  async (orderId) => {
-    const response = await fetch(`/api/orders/${orderId}`);
-    const data = await response.json();
-    if (!data.success) throw new Error(data.message);
-    return data.data;
+  async (orderId, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/orders/${orderId}`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      if (!data.success) throw new Error(data.message);
+      return data.data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
   }
 );
 
 export const createOrder = createAsyncThunk(
   'orders/create',
-  async (orderData) => {
-    const response = await fetch('/api/orders', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(orderData)
-    });
-    const data = await response.json();
-    if (!data.success) throw new Error(data.message);
-    return data.data;
+  async (orderData, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/orders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderData)
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      if (!data.success) throw new Error(data.message);
+      return data.data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
   }
 );
 
 export const updateOrderStatus = createAsyncThunk(
   'orders/updateStatus',
-  async ({ orderId, statusData }) => {
-    const response = await fetch(`/api/orders/${orderId}/status`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(statusData)
-    });
-    const data = await response.json();
-    if (!data.success) throw new Error(data.message);
-    return data.data;
+  async ({ orderId, statusData }, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/orders/${orderId}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(statusData)
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      if (!data.success) throw new Error(data.message);
+      return data.data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
   }
 );
 
 export const updatePaymentStatus = createAsyncThunk(
   'orders/updatePayment',
-  async ({ orderId, paymentStatus }) => {
-    const response = await fetch(`/api/orders/${orderId}/payment-status`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ paymentStatus })
-    });
-    const data = await response.json();
-    if (!data.success) throw new Error(data.message);
-    return data.data;
+  async ({ orderId, paymentStatus }, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/orders/${orderId}/payment-status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paymentStatus })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      if (!data.success) throw new Error(data.message);
+      return data.data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
   }
 );
 
 export const cancelOrder = createAsyncThunk(
   'orders/cancel',
-  async ({ orderId, cancelReason }) => {
-    const response = await fetch(`/api/orders/${orderId}/cancel`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cancelReason })
-    });
-    const data = await response.json();
-    if (!data.success) throw new Error(data.message);
-    return data.data;
+  async ({ orderId, cancelReason }, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/orders/${orderId}/cancel`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cancelReason })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      if (!data.success) throw new Error(data.message);
+      return data.data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
   }
 );
 
 export const fetchOrderStatistics = createAsyncThunk(
   'orders/fetchStatistics',
-  async () => {
-    const response = await fetch('/api/orders/statistics');
-    const data = await response.json();
-    if (!data.success) throw new Error(data.message);
-    return data.data;
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/orders/statistics`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      if (!data.success) throw new Error(data.message);
+      return data.data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
   }
 );
 
@@ -124,7 +190,7 @@ const orderSlice = createSlice({
       })
       .addCase(fetchOrders.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message;
+        state.error = action.payload || action.error.message;
       })
       
       // Fetch Order By ID
@@ -138,7 +204,7 @@ const orderSlice = createSlice({
       })
       .addCase(fetchOrderById.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message;
+        state.error = action.payload || action.error.message;
       })
       
       // Create Order
@@ -153,7 +219,7 @@ const orderSlice = createSlice({
       })
       .addCase(createOrder.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message;
+        state.error = action.payload || action.error.message;
       })
       
       // Update Order Status

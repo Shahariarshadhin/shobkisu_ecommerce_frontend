@@ -10,6 +10,7 @@ import deviceConditionReducer from "./deviceConditionSlice";
 import warrantyReducer from "./warrantySlice";
 import productReducer from "./productSlice";
 import uiReducer from './uiSlice';
+import orderReducer from './orderSlice';
 
 export const store = configureStore({
   reducer: { 
@@ -24,5 +25,6 @@ export const store = configureStore({
     warranties: warrantyReducer,
     products: productReducer,
      ui: uiReducer,
+     orders: orderReducer,
   },
 });
