@@ -13,7 +13,7 @@ export default function ProductGrid({
     onAddToCart, 
     onClearFilters 
 }) {
-    const [viewMode, setViewMode] = useState('grid-3');
+    const [viewMode, setViewMode] = useState('grid-4');
 
     const getGridClass = () => {
         switch (viewMode) {

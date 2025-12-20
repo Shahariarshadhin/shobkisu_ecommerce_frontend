@@ -2,7 +2,7 @@ import { ShoppingCart } from 'lucide-react';
 
 export default function ProductCard({ product, onAddToCart, isCompact = false }) {
     return (
-        <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+        <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-[#D3BFAF]">
             <div className={`relative ${isCompact ? 'h-40' : 'h-64'} bg-gray-100`}>
                 <img
                     src={product.thumbnailImage || 'https://via.placeholder.com/400'}

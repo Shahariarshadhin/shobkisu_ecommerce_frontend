@@ -1,4 +1,3 @@
-
 "use client";
 import {
   BarChart3,
@@ -6,6 +5,7 @@ import {
   ChevronDown,
   Database,
   FileText,
+  Flag,
   Grid3x3,
   Home,
   List,
@@ -48,15 +48,27 @@ const NAV_CONFIG = [
     label: "Advertisement Order",
     submenu: [
       // { label: "Create Order", link: "/dashboard/order/create", icon: PlusCircle },
-      { label: "Advertisement Orders", link: "/dashboard/advertise-order", icon: List },
+      {
+        label: "Advertisement Orders",
+        link: "/dashboard/advertise-order",
+        icon: List,
+      },
     ],
   },
   {
     icon: Megaphone,
     label: "Advertisement",
     submenu: [
-      { label: "Create Advertisement", link: "/dashboard/advertise/create-advertisement-content", icon: PlusCircle },
-      { label: "Advertisement List", link: "/dashboard/advertise/advertise-list", icon: List },
+      {
+        label: "Create Advertisement",
+        link: "/dashboard/advertise/create-advertisement-content",
+        icon: PlusCircle,
+      },
+      {
+        label: "Advertisement List",
+        link: "/dashboard/advertise/advertise-list",
+        icon: List,
+      },
     ],
   },
   {
@@ -69,7 +81,11 @@ const NAV_CONFIG = [
     icon: Package,
     label: "Product Management",
     submenu: [
-      { label: "Create Product", link: "/dashboard/products/create-product", icon: Tag },
+      {
+        label: "Create Product",
+        link: "/dashboard/products/create-product",
+        icon: Tag,
+      },
       { label: "Product List", link: "/dashboard/products", icon: Grid3x3 },
     ],
   },
@@ -80,10 +96,27 @@ const NAV_CONFIG = [
       { label: "Brand Management", link: "/dashboard/brands", icon: Tag },
       { label: "Model Management", link: "/dashboard/models", icon: Grid3x3 },
       { label: "Color Management", link: "/dashboard/colors", icon: Palette },
-      { label: "Storage Management", link: "/dashboard/storages", icon: Database },
-      { label: "SIM Management", link: "/dashboard/sim-network", icon: Smartphone },
-      { label: "Device Condition Management", link: "/dashboard/device-conditions", icon: Smartphone },
-      { label: "Warranty Management", link: "/dashboard/warranties", icon: Shield },
+      {
+        label: "Storage Management",
+        link: "/dashboard/storages",
+        icon: Database,
+      },
+      {
+        label: "SIM Management",
+        link: "/dashboard/sim-network",
+        icon: Smartphone,
+      },
+      {
+        label: "Device Condition Management",
+        link: "/dashboard/device-conditions",
+        icon: Smartphone,
+      },
+      {
+        label: "Warranty Management",
+        link: "/dashboard/warranties",
+        icon: Shield,
+      },
+      { label: "Flag Management", link: "/dashboard/flags", icon: Flag },
     ],
   },
   { icon: FileText, label: "Projects", link: "/dashboard/projects" },
@@ -93,7 +126,7 @@ const NAV_CONFIG = [
 // Submenu Component
 const NavSubmenu = ({ items, isOpen }) => {
   if (!isOpen) return null;
-  
+
   return (
     <div className="mt-2 ml-4 space-y-1">
       {items.map((item) => (
@@ -157,7 +190,9 @@ const UserAvatar = ({ name, size = "md" }) => {
   };
 
   return (
-    <div className={`${sizeClasses[size]} bg-linear-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center`}>
+    <div
+      className={`${sizeClasses[size]} bg-linear-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center`}
+    >
       <span className="text-white font-semibold">
         {name?.charAt(0).toUpperCase() || "U"}
       </span>
@@ -193,159 +228,162 @@ export default function DashboardLayout({ children }) {
 
   return (
     <ProtectedRoute>
-       <html lang="en">
+      <html lang="en">
         <body>
-      <div className="flex h-screen bg-gray-50">
-        {/* Sidebar */}
-        <aside
-          className={`${
-            sidebarOpen ? "w-64" : "w-20"
-          } bg-slate-900 text-white transition-all duration-300 flex flex-col`}
-        >
-          {/* Logo */}
-          <Link href="/" className="p-4 border-b border-slate-800">
-            <div className="flex items-center gap-3">
-              <div className="w-16 h-16 relative">
-                <Image
-                  className="rounded-lg object-cover"
-                  src="/assets/Logo/shobkisulogo.png"
-                  alt="সব কিছু লোগো"
-                  fill
-                  sizes="64px"
-                />
-              </div>
-              {sidebarOpen && (
-                <span className="font-semibold text-lg">সব কিছু</span>
-              )}
-            </div>
-          </Link>
-
-          {/* Navigation */}
-          <nav className="flex-1 p-2 space-y-2 overflow-y-auto scrollbar-hide">
-            {filteredNavItems.map((item) => (
-              <NavItem
-                key={item.label}
-                item={item}
-                isOpen={openMenus[item.label]}
-                sidebarOpen={sidebarOpen}
-                onToggle={() => toggleMenu(item.label)}
-              />
-            ))}
-          </nav>
-
-          {/* User Profile */}
-          <div className="p-4 border-t border-slate-800">
-            <div className="flex items-center gap-3">
-              <UserAvatar name={user?.name} />
-              {sidebarOpen && (
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">
-                    {user?.name || "User"}
-                  </p>
-                  <p className="text-xs text-gray-400 capitalize">
-                    {user?.role || "user"}
-                  </p>
+          <div className="flex h-screen bg-gray-50">
+            {/* Sidebar */}
+            <aside
+              className={`${
+                sidebarOpen ? "w-64" : "w-20"
+              } bg-slate-900 text-white transition-all duration-300 flex flex-col`}
+            >
+              {/* Logo */}
+              <Link href="/" className="p-4 border-b border-slate-800">
+                <div className="flex items-center gap-3">
+                  <div className="w-16 h-16 relative">
+                    <Image
+                      className="rounded-lg object-cover"
+                      src="/assets/Logo/shobkisulogo.png"
+                      alt="সব কিছু লোগো"
+                      fill
+                      sizes="64px"
+                    />
+                  </div>
+                  {sidebarOpen && (
+                    <span className="font-semibold text-lg">সব কিছু</span>
+                  )}
                 </div>
-              )}
+              </Link>
+
+              {/* Navigation */}
+              <nav className="flex-1 p-2 space-y-2 overflow-y-auto scrollbar-hide">
+                {filteredNavItems.map((item) => (
+                  <NavItem
+                    key={item.label}
+                    item={item}
+                    isOpen={openMenus[item.label]}
+                    sidebarOpen={sidebarOpen}
+                    onToggle={() => toggleMenu(item.label)}
+                  />
+                ))}
+              </nav>
+
+              {/* User Profile */}
+              <div className="p-4 border-t border-slate-800">
+                <div className="flex items-center gap-3">
+                  <UserAvatar name={user?.name} />
+                  {sidebarOpen && (
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">
+                        {user?.name || "User"}
+                      </p>
+                      <p className="text-xs text-gray-400 capitalize">
+                        {user?.role || "user"}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </aside>
+
+            {/* Main Content */}
+            <div className="flex-1 flex flex-col min-w-0">
+              {/* Top Navbar */}
+              <header className="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-6 flex-shrink-0">
+                {/* Left Section */}
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={() => setSidebarOpen(!sidebarOpen)}
+                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                    aria-label="Toggle sidebar"
+                  >
+                    <Menu size={20} className="text-gray-600" />
+                  </button>
+
+                  {/* Search */}
+                  <div className="relative">
+                    <Search
+                      size={18}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+                    />
+                    <input
+                      type="search"
+                      placeholder="Search..."
+                      className="pl-10 pr-4 py-2 w-80 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      aria-label="Search"
+                    />
+                  </div>
+                </div>
+
+                {/* Right Section */}
+                <div className="flex items-center gap-4">
+                  {/* Notifications */}
+                  <button
+                    className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                    aria-label="Notifications"
+                  >
+                    <Bell size={20} className="text-gray-600" />
+                    <span
+                      className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"
+                      aria-hidden="true"
+                    ></span>
+                  </button>
+
+                  {/* User Menu */}
+                  <div className="relative">
+                    <button
+                      onClick={() => setUserMenuOpen(!userMenuOpen)}
+                      className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                      aria-expanded={userMenuOpen}
+                      aria-haspopup="true"
+                    >
+                      <UserAvatar name={user?.name} size="sm" />
+                      <span className="text-sm font-medium text-gray-700">
+                        {user?.name || "User"}
+                      </span>
+                      <ChevronDown size={16} className="text-gray-400" />
+                    </button>
+
+                    {/* Dropdown Menu */}
+                    {userMenuOpen && (
+                      <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                        <Link
+                          href="/dashboard/profile"
+                          className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                          onClick={() => setUserMenuOpen(false)}
+                        >
+                          <User size={16} />
+                          Profile
+                        </Link>
+                        <Link
+                          href="/dashboard/settings"
+                          className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                          onClick={() => setUserMenuOpen(false)}
+                        >
+                          <Settings size={16} />
+                          Settings
+                        </Link>
+                        <hr className="my-2" />
+                        <button
+                          onClick={handleLogout}
+                          className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-50 flex items-center gap-2"
+                        >
+                          <LogOut size={16} />
+                          Logout
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </header>
+
+              {/* Page Content */}
+              <main className="flex-1 p-6 overflow-auto scrollbar-hide">
+                {children}
+              </main>
             </div>
           </div>
-        </aside>
-
-        {/* Main Content */}
-        <div className="flex-1 flex flex-col min-w-0">
-          {/* Top Navbar */}
-          <header className="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-6 flex-shrink-0">
-            {/* Left Section */}
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                aria-label="Toggle sidebar"
-              >
-                <Menu size={20} className="text-gray-600" />
-              </button>
-
-              {/* Search */}
-              <div className="relative">
-                <Search
-                  size={18}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-                />
-                <input
-                  type="search"
-                  placeholder="Search..."
-                  className="pl-10 pr-4 py-2 w-80 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  aria-label="Search"
-                />
-              </div>
-            </div>
-
-            {/* Right Section */}
-            <div className="flex items-center gap-4">
-              {/* Notifications */}
-              <button
-                className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                aria-label="Notifications"
-              >
-                <Bell size={20} className="text-gray-600" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" aria-hidden="true"></span>
-              </button>
-
-              {/* User Menu */}
-              <div className="relative">
-                <button
-                  onClick={() => setUserMenuOpen(!userMenuOpen)}
-                  className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                  aria-expanded={userMenuOpen}
-                  aria-haspopup="true"
-                >
-                  <UserAvatar name={user?.name} size="sm" />
-                  <span className="text-sm font-medium text-gray-700">
-                    {user?.name || "User"}
-                  </span>
-                  <ChevronDown size={16} className="text-gray-400" />
-                </button>
-
-                {/* Dropdown Menu */}
-                {userMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
-                    <Link
-                      href="/dashboard/profile"
-                      className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                      onClick={() => setUserMenuOpen(false)}
-                    >
-                      <User size={16} />
-                      Profile
-                    </Link>
-                    <Link
-                      href="/dashboard/settings"
-                      className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                      onClick={() => setUserMenuOpen(false)}
-                    >
-                      <Settings size={16} />
-                      Settings
-                    </Link>
-                    <hr className="my-2" />
-                    <button
-                      onClick={handleLogout}
-                      className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-50 flex items-center gap-2"
-                    >
-                      <LogOut size={16} />
-                      Logout
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          </header>
-
-          {/* Page Content */}
-          <main className="flex-1 p-6 overflow-auto scrollbar-hide">
-            {children}
-          </main>
-        </div>
-      </div>
-      </body>
+        </body>
       </html>
     </ProtectedRoute>
   );

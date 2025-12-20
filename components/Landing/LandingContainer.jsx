@@ -2,6 +2,13 @@
 import { Shield, Truck, Zap } from 'lucide-react';
 import Image from "next/image";
 import LandingHero from "./LandingHero";
+import ProductGrid from '../Pages/Shop/layout/ProductGrid';
+import { useProductFilters } from '../../hooks/useProductFilters';
+// import { fetchProducts } from '../../../redux/productSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchProducts } from '../../redux/productSlice';
+import { useEffect } from 'react';
+import { useCartActions } from '../../hooks/useCartActions';
 
 
 const LandingContainer = () => {
@@ -14,12 +21,25 @@ const LandingContainer = () => {
         { name: 'Toys', image: '⚽', color: 'bg-[#D0B9A7]' }
     ];
 
-    const products = [
+    const productsDemo = [
         { id: 1, name: 'Premium Wireless Headphones', price: 299, rating: 4.8, image: '/assets/Products/rickshaw.png' },
         { id: 2, name: 'Smart Watch Pro', price: 399, rating: 4.9, image: '/assets/Products/tempu.png' },
         { id: 3, name: 'Designer Backpack', price: 149, rating: 4.7, image: '/assets/Products/lamp.png' },
         // { id: 4, name: 'Vintage Sunglasses', price: 199, rating: 4.6, image: '🕶️' }
     ];
+
+    const dispatch = useDispatch();
+
+    const { products = [], loading: productsLoading } = useSelector((state) => state.products || {});
+    const filterState = useProductFilters(products);
+    const { handleAddToCart } = useCartActions();
+
+
+    useEffect(() => {
+        dispatch(fetchProducts({ page: 1, limit: 100 }));
+
+    }, [dispatch]);
+
     return (
         <div>
             {/* <LandingHero /> */}
@@ -32,6 +52,15 @@ const LandingContainer = () => {
                     <div className="max-w-7xl mx-auto">
                         <LandingHero />
                     </div>
+                </div>
+
+                <div className="max-w-7xl mx-auto">
+                    <ProductGrid
+                        products={filterState.filteredProducts}
+                        loading={productsLoading}
+                        onAddToCart={handleAddToCart}
+                        onClearFilters={filterState.clearFilters}
+                    />
                 </div>
 
                 {/* Features */}
@@ -90,12 +119,14 @@ const LandingContainer = () => {
                     </div>
                 </div>
 
+
+
                 {/* Featured Products */}
                 <div className="py-16 px-4 sm:px-6 lg:px-8 bg-white">
                     <div className="max-w-7xl mx-auto">
                         <h2 className="text-4xl font-bold text-center mb-12">Featured Products</h2>
                         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {products.map((product) => (
+                            {productsDemo.map((product) => (
                                 <div
                                     key={product.id}
                                     className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer"

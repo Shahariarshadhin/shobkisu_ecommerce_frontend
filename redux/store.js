@@ -11,6 +11,7 @@ import warrantyReducer from "./warrantySlice";
 import productReducer from "./productSlice";
 import uiReducer from './uiSlice';
 import orderReducer from './orderSlice';
+import flagReducer from './flagSlice';
 
 export const store = configureStore({
   reducer: { 
@@ -23,6 +24,7 @@ export const store = configureStore({
     sims: simReducer,
     deviceConditions: deviceConditionReducer,
     warranties: warrantyReducer,
+    flags: flagReducer,
     products: productReducer,
      ui: uiReducer,
      orders: orderReducer,
