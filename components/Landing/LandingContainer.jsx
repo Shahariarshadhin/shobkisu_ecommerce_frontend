@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchProducts } from '../../redux/productSlice';
 import { useEffect } from 'react';
 import { useCartActions } from '../../hooks/useCartActions';
+import HomepageProductSections from './HomepageProductSections';
 
 
 const LandingContainer = () => {
@@ -54,14 +55,16 @@ const LandingContainer = () => {
                     </div>
                 </div>
 
-                <div className="max-w-7xl mx-auto">
+                <HomepageProductSections />
+
+                {/* <div className="max-w-7xl mx-auto">
                     <ProductGrid
                         products={filterState.filteredProducts}
                         loading={productsLoading}
                         onAddToCart={handleAddToCart}
                         onClearFilters={filterState.clearFilters}
                     />
-                </div>
+                </div> */}
 
                 {/* Features */}
                 <div className="py-12 px-4 sm:px-6 lg:px-8 bg-white">

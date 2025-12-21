@@ -9,13 +9,14 @@ import simReducer from "./simSlice";
 import deviceConditionReducer from "./deviceConditionSlice";
 import warrantyReducer from "./warrantySlice";
 import productReducer from "./productSlice";
-import uiReducer from './uiSlice';
-import orderReducer from './orderSlice';
-import flagReducer from './flagSlice';
+import uiReducer from "./uiSlice";
+import orderReducer from "./orderSlice";
+import flagReducer from "./flagSlice";
+import homepageProductLayoutReducer from "./homepageProductLayoutSlice";
 
 export const store = configureStore({
-  reducer: { 
-    cart: cartReducer, 
+  reducer: {
+    cart: cartReducer,
     auth: authReducer,
     brands: brandReducer,
     models: modelReducer,
@@ -26,7 +27,8 @@ export const store = configureStore({
     warranties: warrantyReducer,
     flags: flagReducer,
     products: productReducer,
-     ui: uiReducer,
-     orders: orderReducer,
+    ui: uiReducer,
+    orders: orderReducer,
+    homepageLayout: homepageProductLayoutReducer,
   },
 });
